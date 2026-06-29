@@ -68,6 +68,22 @@ export default defineConfig({
             { text: '1. 소개', link: '/copilotkit-source/01-introduction' },
             { text: '2. Monorepo 지도', link: '/copilotkit-source/02-monorepo-map' },
             { text: '3. 통제 경계', link: '/copilotkit-source/03-control-boundary' },
+            {
+              text: '4. Core와 Runtime 코드 경로',
+              link: '/copilotkit-source/04-core-runtime-codepath',
+            },
+            {
+              text: '5. AG-UI 이벤트 모델',
+              link: '/copilotkit-source/05-ag-ui-event-model',
+            },
+            {
+              text: '6. UI Tools와 A2UI',
+              link: '/copilotkit-source/06-ui-tools-a2ui-rendering',
+            },
+            {
+              text: '7. Mothership 적용 설계',
+              link: '/copilotkit-source/07-mothership-application-layer',
+            },
           ],
         },
       ],

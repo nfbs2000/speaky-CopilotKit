@@ -1,8 +1,8 @@
 # 2. CopilotKit Monorepo 지도
 
-CopilotKit을 이해하려면 README보다 먼저 package 경계를 봐야 합니다. 이 repo는 단일 React package가 아니라 frontend, runtime, protocol adapter, UI renderer, platform bot, example을 함께 가진 monorepo입니다.
+CopilotKit을 제대로 읽으려면 package 경계를 먼저 봐야 합니다. 이 repo는 단일 React widget이 아니라 frontend core, React hooks, runtime, AG-UI adapter, A2UI renderer, examples, docs, bot surface가 같이 있는 monorepo입니다.
 
-## 큰 구조
+## 전체 구조
 
 ```mermaid
 flowchart TB
@@ -19,106 +19,141 @@ flowchart TB
   Packages --> ReactUI["@copilotkit/react-ui"]
   Packages --> A2UI["@copilotkit/a2ui-renderer"]
   Packages --> Inspector["@copilotkit/web-inspector"]
-  Packages --> Bots["@copilotkit/bot-*"]
+  Packages --> Bots["@copilotkit/bot packages"]
 ```
 
-## 주요 package 역할
+## package별 책임
 
-| Package | 역할 | Source |
+| Package | 책임 | Source |
 | --- | --- | --- |
-| `@copilotkit/core` | agent registry, context store, run handler, state manager를 가진 frontend orchestration core | [`packages/core/src`](https://github.com/nfbs2000/speaky-CopilotKit/tree/5c50d9c51/packages/core/src) |
+| `@copilotkit/core` | agent registry, context store, run handler, state manager를 가진 client-side orchestration core | [`packages/core/src`](https://github.com/nfbs2000/speaky-CopilotKit/tree/5c50d9c51/packages/core/src) |
 | `@copilotkit/react-core` | React Provider, hooks, chat integration, A2UI/MCP Apps renderer bridge | [`packages/react-core/src`](https://github.com/nfbs2000/speaky-CopilotKit/tree/5c50d9c51/packages/react-core/src) |
-| `@copilotkit/react-ui` | Chat, popup, sidebar 같은 React UI surface | [`packages/react-ui/src`](https://github.com/nfbs2000/speaky-CopilotKit/tree/5c50d9c51/packages/react-ui/src) |
-| `@copilotkit/runtime` | server runtime, agent runner, built-in agent, Hono/Express handler | [`packages/runtime/src`](https://github.com/nfbs2000/speaky-CopilotKit/tree/5c50d9c51/packages/runtime/src) |
-| `@copilotkit/sdk-js` | JavaScript/TypeScript agent framework integration helpers | [`packages/sdk-js/src`](https://github.com/nfbs2000/speaky-CopilotKit/tree/5c50d9c51/packages/sdk-js/src) |
-| `sdk-python` | Python integrations and AG-UI compatible SDK tests | [`sdk-python`](https://github.com/nfbs2000/speaky-CopilotKit/tree/5c50d9c51/sdk-python) |
-| `@copilotkit/a2ui-renderer` | A2UI declarative surface renderer | [`packages/a2ui-renderer/src`](https://github.com/nfbs2000/speaky-CopilotKit/tree/5c50d9c51/packages/a2ui-renderer/src) |
+| `@copilotkit/react-ui` | Chat, popup, sidebar 등 ready-made UI surface | [`packages/react-ui/src`](https://github.com/nfbs2000/speaky-CopilotKit/tree/5c50d9c51/packages/react-ui/src) |
+| `@copilotkit/runtime` | server runtime, agent runner, built-in agent, fetch handlers | [`packages/runtime/src`](https://github.com/nfbs2000/speaky-CopilotKit/tree/5c50d9c51/packages/runtime/src) |
+| `@copilotkit/sdk-js` | JavaScript/TypeScript agent integration helper | [`packages/sdk-js/src`](https://github.com/nfbs2000/speaky-CopilotKit/tree/5c50d9c51/packages/sdk-js/src) |
+| `sdk-python` | Python integrations and AG-UI compatible tests | [`sdk-python`](https://github.com/nfbs2000/speaky-CopilotKit/tree/5c50d9c51/sdk-python) |
+| `@copilotkit/a2ui-renderer` | A2UI declarative surface renderer와 catalog extraction | [`packages/a2ui-renderer/src`](https://github.com/nfbs2000/speaky-CopilotKit/tree/5c50d9c51/packages/a2ui-renderer/src) |
 | `@copilotkit/web-inspector` | AG-UI/event debugging inspector | [`packages/web-inspector/src`](https://github.com/nfbs2000/speaky-CopilotKit/tree/5c50d9c51/packages/web-inspector/src) |
-| `@copilotkit/bot-*` | Slack, Teams, Discord, Telegram, WhatsApp 등 browser 밖 surface | [`packages/bot`](https://github.com/nfbs2000/speaky-CopilotKit/tree/5c50d9c51/packages/bot) |
 
-## Core layer
+## Core package 읽기
 
-`packages/core`는 CopilotKit의 client-side execution core입니다.
+`packages/core`는 CopilotKit의 client-side 실행 중심입니다.
 
-| 파일 | 읽을 내용 |
+| 파일 | 봐야 할 지점 |
 | --- | --- |
 | [`core.ts`](https://github.com/nfbs2000/speaky-CopilotKit/blob/5c50d9c51/packages/core/src/core/core.ts) | `CopilotKitCoreConfig`, subsystem 생성, subscriber, runtime connection status |
-| [`run-handler.ts`](https://github.com/nfbs2000/speaky-CopilotKit/blob/5c50d9c51/packages/core/src/core/run-handler.ts) | agent run, frontend tool execution, tool result message 삽입, follow-up run |
-| [`context-store.ts`](https://github.com/nfbs2000/speaky-CopilotKit/blob/5c50d9c51/packages/core/src/core/context-store.ts) | app context를 agent에게 읽히는 입력으로 관리 |
-| [`state-manager.ts`](https://github.com/nfbs2000/speaky-CopilotKit/blob/5c50d9c51/packages/core/src/core/state-manager.ts) | agent state snapshot/delta 관리 |
-| [`agent-registry.ts`](https://github.com/nfbs2000/speaky-CopilotKit/blob/5c50d9c51/packages/core/src/core/agent-registry.ts) | agent 등록, runtime URL, transport 관리 |
+| [`agent-registry.ts`](https://github.com/nfbs2000/speaky-CopilotKit/blob/5c50d9c51/packages/core/src/core/agent-registry.ts) | local/remote/proxied agent, runtime `/info`, transport auto-detect |
+| [`context-store.ts`](https://github.com/nfbs2000/speaky-CopilotKit/blob/5c50d9c51/packages/core/src/core/context-store.ts) | agent scope가 있는 app context 저장과 필터링 |
+| [`run-handler.ts`](https://github.com/nfbs2000/speaky-CopilotKit/blob/5c50d9c51/packages/core/src/core/run-handler.ts) | `runAgent`, frontend tool execution, tool result message 삽입, follow-up |
+| [`state-manager.ts`](https://github.com/nfbs2000/speaky-CopilotKit/blob/5c50d9c51/packages/core/src/core/state-manager.ts) | AG-UI state snapshot/delta와 run/message association |
 
-핵심은 `RunHandler`입니다. agent가 assistant tool call을 내면 CopilotKit은 등록된 frontend tool을 찾고, handler를 실행하고, result를 `role: "tool"` message로 agent messages에 삽입합니다. 그리고 `followUp !== false`이면 다시 agent run을 이어갑니다.
+Core의 흐름은 다음처럼 읽으면 됩니다.
 
-## React layer
+```mermaid
+flowchart LR
+  Provider["React Provider"] --> Core["CopilotKitCore"]
+  Core --> Registry["AgentRegistry"]
+  Core --> Context["ContextStore"]
+  Core --> Run["RunHandler"]
+  Core --> State["StateManager"]
+  Registry --> Agent["HttpAgent or Proxied Agent"]
+  Run --> Agent
+  Agent --> State
+```
 
-`packages/react-core`는 React 앱이 CopilotKit core를 사용하는 표면입니다.
+## React layer 읽기
 
-| API | 역할 | Source |
+`packages/react-core`는 앱 개발자가 직접 만지는 layer입니다.
+
+| API | 소스 | 실제 의미 |
 | --- | --- | --- |
-| `CopilotKitProvider` | core 생성, runtime 연결, provider-level 설정 | [`CopilotKitProvider.tsx`](https://github.com/nfbs2000/speaky-CopilotKit/blob/5c50d9c51/packages/react-core/src/v2/providers/CopilotKitProvider.tsx) |
-| `useAgent` | agent instance를 얻고 messages/state/run status update에 subscribe | [`use-agent.tsx`](https://github.com/nfbs2000/speaky-CopilotKit/blob/5c50d9c51/packages/react-core/src/v2/hooks/use-agent.tsx) |
-| `useAgentContext` | 앱 상태를 agent input context로 등록 | [`use-agent-context.tsx`](https://github.com/nfbs2000/speaky-CopilotKit/blob/5c50d9c51/packages/react-core/src/v2/hooks/use-agent-context.tsx) |
-| `useFrontendTool` | browser/app-side tool handler와 optional renderer 등록 | [`use-frontend-tool.tsx`](https://github.com/nfbs2000/speaky-CopilotKit/blob/5c50d9c51/packages/react-core/src/v2/hooks/use-frontend-tool.tsx) |
-| `useRenderTool` | tool call renderer만 등록 | [`use-render-tool.tsx`](https://github.com/nfbs2000/speaky-CopilotKit/blob/5c50d9c51/packages/react-core/src/v2/hooks/use-render-tool.tsx) |
-| `useHumanInTheLoop` | 사용자의 응답을 promise로 받아 tool result로 돌려주는 HITL hook | [`use-human-in-the-loop.tsx`](https://github.com/nfbs2000/speaky-CopilotKit/blob/5c50d9c51/packages/react-core/src/v2/hooks/use-human-in-the-loop.tsx) |
+| `CopilotKitProvider` | [`CopilotKitProvider.tsx`](https://github.com/nfbs2000/speaky-CopilotKit/blob/5c50d9c51/packages/react-core/src/v2/providers/CopilotKitProvider.tsx) | core instance 생성, runtime URL/headers/properties sync, tools/renderers/A2UI context 구성 |
+| `useAgent` | [`use-agent.tsx`](https://github.com/nfbs2000/speaky-CopilotKit/blob/5c50d9c51/packages/react-core/src/v2/hooks/use-agent.tsx) | agent instance, messages, state, run status를 React state로 연결 |
+| `useFrontendTool` | [`use-frontend-tool.tsx`](https://github.com/nfbs2000/speaky-CopilotKit/blob/5c50d9c51/packages/react-core/src/v2/hooks/use-frontend-tool.tsx) | agent가 호출할 수 있는 frontend capability 등록 |
+| `useRenderTool` | [`use-render-tool.tsx`](https://github.com/nfbs2000/speaky-CopilotKit/blob/5c50d9c51/packages/react-core/src/v2/hooks/use-render-tool.tsx) | tool call/result 표시 방식만 등록 |
+| `useHumanInTheLoop` | [`use-human-in-the-loop.tsx`](https://github.com/nfbs2000/speaky-CopilotKit/blob/5c50d9c51/packages/react-core/src/v2/hooks/use-human-in-the-loop.tsx) | 사용자 응답을 tool result로 되돌리는 interaction tool |
+| A2UI renderer | [`A2UIMessageRenderer.tsx`](https://github.com/nfbs2000/speaky-CopilotKit/blob/5c50d9c51/packages/react-core/src/v2/a2ui/A2UIMessageRenderer.tsx) | `a2ui_operations` activity를 React surface로 처리 |
 
-React layer에서 가장 중요한 구분은 `useFrontendTool`과 `useRenderTool`입니다.
+`CopilotKitProvider`에서 특히 봐야 할 부분은 세 가지입니다.
 
-| Hook | handler를 등록하는가 | renderer를 등록하는가 | 의미 |
-| --- | --- | --- | --- |
-| `useFrontendTool` | 예 | 선택 가능 | agent가 호출할 앱 기능을 엽니다. |
-| `useRenderTool` | 아니오 | 예 | 이미 발생한 tool call/result를 어떻게 보여줄지 정합니다. |
-| `useHumanInTheLoop` | 예 | 예 | 사용자 승인/수정 입력을 tool result로 돌려줍니다. |
+1. source의 props가 runtime, agents, tools, renderers, HITL, A2UI, OpenGenerativeUI를 모두 받습니다.
+2. provider는 child hooks에서 등록한 tool을 덮어쓰지 않도록 첫 setter effect를 건너뜁니다.
+3. A2UI가 활성화되면 built-in A2UI message renderer와 catalog context를 provider tree에 붙입니다.
 
-## Runtime layer
+## Runtime layer 읽기
 
-`packages/runtime`은 server-side runtime입니다.
+`packages/runtime`은 server boundary입니다.
 
-| 개념 | Source | 의미 |
-| --- | --- | --- |
-| `CopilotRuntime` | [`runtime.ts`](https://github.com/nfbs2000/speaky-CopilotKit/blob/5c50d9c51/packages/runtime/src/v2/runtime/core/runtime.ts#L388) | legacy entrypoint compatibility shim |
-| `CopilotSseRuntime` | [`runtime.ts`](https://github.com/nfbs2000/speaky-CopilotKit/blob/5c50d9c51/packages/runtime/src/v2/runtime/core/runtime.ts#L298) | 기본 SSE runtime |
-| `CopilotIntelligenceRuntime` | [`runtime.ts`](https://github.com/nfbs2000/speaky-CopilotKit/blob/5c50d9c51/packages/runtime/src/v2/runtime/core/runtime.ts#L310) | durable thread/realtime Intelligence runtime |
-| `AgentRunner` | [`runner`](https://github.com/nfbs2000/speaky-CopilotKit/tree/5c50d9c51/packages/runtime/src/v2/runtime/runner) | agent execution strategy |
-| `BuiltInAgent` | [`agent`](https://github.com/nfbs2000/speaky-CopilotKit/tree/5c50d9c51/packages/runtime/src/agent) | Vercel AI SDK 기반 ready-to-use agent |
-
-Runtime은 모델을 직접 “통제”하는 두뇌가 아닙니다. Runtime은 request를 받고, agent runner를 호출하고, AG-UI events를 frontend로 stream하며, middleware를 적용하는 server boundary입니다.
-
-## AG-UI와 skills
-
-이 repo에는 agent가 CopilotKit과 어떻게 통신해야 하는지 설명하는 skill 문서가 들어 있습니다.
-
-| Skill | 역할 |
+| 파일 | 역할 |
 | --- | --- |
-| [`skills/copilotkit-agui`](https://github.com/nfbs2000/speaky-CopilotKit/tree/5c50d9c51/skills/copilotkit-agui) | AG-UI event type, SSE, `AbstractAgent`, `HttpAgent`, tool call, state sync, interrupt/resume |
-| [`skills/copilotkit-setup`](https://github.com/nfbs2000/speaky-CopilotKit/tree/5c50d9c51/skills/copilotkit-setup) | app/runtime setup, provider, endpoint architecture |
-| [`skills/copilotkit-integrations`](https://github.com/nfbs2000/speaky-CopilotKit/tree/5c50d9c51/skills/copilotkit-integrations) | LangGraph, CrewAI, Mastra, ADK, MCP Apps 같은 framework integration |
-| [`skills/a2ui-renderer`](https://github.com/nfbs2000/speaky-CopilotKit/tree/5c50d9c51/skills/a2ui-renderer) | A2UI renderer 설정과 runtime/client 양쪽 enable rule |
+| [`core/runtime.ts`](https://github.com/nfbs2000/speaky-CopilotKit/blob/5c50d9c51/packages/runtime/src/v2/runtime/core/runtime.ts) | `CopilotSseRuntime`, `CopilotIntelligenceRuntime`, compatibility `CopilotRuntime` |
+| [`core/fetch-handler.ts`](https://github.com/nfbs2000/speaky-CopilotKit/blob/5c50d9c51/packages/runtime/src/v2/runtime/core/fetch-handler.ts) | CORS, middleware, route dispatch, single endpoint support |
+| [`handlers/get-runtime-info.ts`](https://github.com/nfbs2000/speaky-CopilotKit/blob/5c50d9c51/packages/runtime/src/v2/runtime/handlers/get-runtime-info.ts) | `/info` response, agent list, A2UI capability, license/runtime mode |
+| [`handlers/handle-run.ts`](https://github.com/nfbs2000/speaky-CopilotKit/blob/5c50d9c51/packages/runtime/src/v2/runtime/handlers/handle-run.ts) | run request parse, agent clone/configure, SSE or Intelligence path |
+| [`runner/in-memory.ts`](https://github.com/nfbs2000/speaky-CopilotKit/blob/5c50d9c51/packages/runtime/src/v2/runtime/runner/in-memory.ts) | active run store, concurrent run guard, connect replay, thread event/state history |
 
-이 skill들은 단순 내부 문서가 아닙니다. 실제로 CopilotKit을 agent coding environment에 설치해 쓰기 위한 운영 지식입니다.
+Runtime은 model SDK wrapper로만 보면 부족합니다. Runtime은 AG-UI endpoint surface입니다.
 
-## Examples와 showcases
+```mermaid
+sequenceDiagram
+  participant Browser
+  participant Runtime
+  participant Runner
+  participant Agent
 
-실제 제품 흐름은 `examples/showcases`에서 확인할 수 있습니다.
+  Browser->>Runtime: POST agent/run with messages, tools, context, state
+  Runtime->>Runtime: parse request and configure middleware
+  Runtime->>Runner: run thread and agent
+  Runner->>Agent: runAgent input
+  Agent-->>Runner: Observable AG-UI events
+  Runner-->>Runtime: events
+  Runtime-->>Browser: text/event-stream
+```
+
+## A2UI와 OpenGenerativeUI 위치
+
+CopilotKit에는 두 가지 UI 생성 경로가 보입니다.
+
+| 경로 | 소스 | 의미 |
+| --- | --- | --- |
+| A2UI | [`packages/react-core/src/v2/a2ui`](https://github.com/nfbs2000/speaky-CopilotKit/tree/5c50d9c51/packages/react-core/src/v2/a2ui), [`packages/a2ui-renderer`](https://github.com/nfbs2000/speaky-CopilotKit/tree/5c50d9c51/packages/a2ui-renderer) | catalog 기반 declarative UI surface를 agent가 조작합니다. |
+| OpenGenerativeUI | [`open-generative-ui-middleware.ts`](https://github.com/nfbs2000/speaky-CopilotKit/blob/5c50d9c51/packages/runtime/src/v2/runtime/open-generative-ui-middleware.ts) | `generateSandboxedUi` tool args를 activity event로 바꿔 streaming UI generation을 투영합니다. |
+
+A2UI는 “모델이 React를 직접 작성한다”가 아닙니다. provider가 A2UI catalog를 주고, runtime middleware와 client renderer가 operation stream을 처리합니다.
+
+## AG-UI 문서 위치
+
+AG-UI는 repo 안에서 여러 곳에 설명되어 있습니다.
+
+| 위치 | 읽을 내용 |
+| --- | --- |
+| [`skills/copilotkit-agui/SKILL.md`](https://github.com/nfbs2000/speaky-CopilotKit/blob/5c50d9c51/skills/copilotkit-agui/SKILL.md) | event family, SSE format, tool call, state sync, interrupt/resume rule |
+| [`dev-docs/architecture/ARCHITECTURE.md`](https://github.com/nfbs2000/speaky-CopilotKit/blob/5c50d9c51/dev-docs/architecture/ARCHITECTURE.md) | frontend, runtime, agent architecture |
+| [`showcase/shell-docs/src/content/ag-ui/concepts/architecture.mdx`](https://github.com/nfbs2000/speaky-CopilotKit/blob/5c50d9c51/showcase/shell-docs/src/content/ag-ui/concepts/architecture.mdx) | `run(input) -> Observable<BaseEvent>` 관점의 AG-UI 설명 |
+| [`showcase/shell-docs/src/content/ag-ui/concepts/tools.mdx`](https://github.com/nfbs2000/speaky-CopilotKit/blob/5c50d9c51/showcase/shell-docs/src/content/ag-ui/concepts/tools.mdx) | frontend-defined tools와 tool lifecycle |
+
+## Examples는 product flow로 읽기
+
+`examples/showcases`는 기능 데모라기보다 product flow reference로 읽는 게 좋습니다.
 
 | Example | 읽을 관점 |
 | --- | --- |
-| [`generative-ui-playground`](https://github.com/nfbs2000/speaky-CopilotKit/tree/5c50d9c51/examples/showcases/generative-ui-playground) | generative UI를 도구/렌더러 관점에서 확인 |
-| [`research-canvas`](https://github.com/nfbs2000/speaky-CopilotKit/tree/5c50d9c51/examples/showcases/research-canvas) | agent-native product flow |
-| [`mcp-apps`](https://github.com/nfbs2000/speaky-CopilotKit/tree/5c50d9c51/examples/showcases/mcp-apps) | MCP Apps middleware와 UI rendering |
-| [`langgraph-js-support-agents`](https://github.com/nfbs2000/speaky-CopilotKit/tree/5c50d9c51/examples/showcases/langgraph-js-support-agents) | LangGraph JS integration |
-| [`adk-dashboard`](https://github.com/nfbs2000/speaky-CopilotKit/tree/5c50d9c51/examples/showcases/adk-dashboard) | ADK dashboard integration |
+| [`generative-ui-playground`](https://github.com/nfbs2000/speaky-CopilotKit/tree/5c50d9c51/examples/showcases/generative-ui-playground) | generative UI와 tool rendering |
+| [`research-canvas`](https://github.com/nfbs2000/speaky-CopilotKit/tree/5c50d9c51/examples/showcases/research-canvas) | canvas형 agent-native UI |
+| [`mcp-apps`](https://github.com/nfbs2000/speaky-CopilotKit/tree/5c50d9c51/examples/showcases/mcp-apps) | MCP Apps middleware와 UI bridge |
+| [`langgraph-js-support-agents`](https://github.com/nfbs2000/speaky-CopilotKit/tree/5c50d9c51/examples/showcases/langgraph-js-support-agents) | LangGraph agent를 AG-UI로 붙이는 방식 |
+| [`adk-dashboard`](https://github.com/nfbs2000/speaky-CopilotKit/tree/5c50d9c51/examples/showcases/adk-dashboard) | dashboard application과 agent event stream 결합 |
 
-## 이 repo를 읽는 좋은 순서
+## 읽는 순서
 
-1. `README.md`로 product framing을 잡습니다.
-2. `dev-docs/architecture/ARCHITECTURE.md`로 three-layer model을 봅니다.
-3. `packages/core/src/core/core.ts`에서 core subsystem을 확인합니다.
-4. `packages/core/src/core/run-handler.ts`에서 tool execution과 follow-up을 봅니다.
-5. `packages/react-core/src/v2/hooks`에서 frontend API를 봅니다.
-6. `packages/runtime/src/v2/runtime`에서 server runtime boundary를 봅니다.
-7. `skills/copilotkit-agui`에서 AG-UI event language를 봅니다.
-8. `examples/showcases`에서 실제 product flow를 봅니다.
+실제 분석 순서는 다음이 좋습니다.
 
-이 순서로 보면 CopilotKit은 “채팅 UI package”가 아니라 “agent-native app을 만들기 위한 runtime + protocol + UI integration kit”으로 보입니다.
+1. `packages/core/src/core/core.ts`에서 subsystem을 봅니다.
+2. `packages/core/src/core/run-handler.ts`에서 tool result와 follow-up을 봅니다.
+3. `packages/react-core/src/v2/providers/CopilotKitProvider.tsx`에서 provider가 무엇을 합치는지 봅니다.
+4. `packages/react-core/src/v2/hooks`에서 앱 API의 의미를 봅니다.
+5. `packages/runtime/src/v2/runtime`에서 server endpoint와 event stream을 봅니다.
+6. `skills/copilotkit-agui`와 `showcase/shell-docs`에서 AG-UI event language를 봅니다.
+7. `examples/showcases`에서 product flow를 봅니다.
+
+이 순서로 보면 CopilotKit은 React chat package가 아니라 “agent application을 만들기 위한 protocol runtime과 UI integration kit”으로 보입니다.

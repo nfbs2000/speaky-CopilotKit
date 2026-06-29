@@ -1,0 +1,17 @@
+.mermaid {
+  display: flex;
+  justify-content: center;
+  margin: 24px 0;
+  overflow-x: auto;
+  white-space: normal;
+}
+
+.mermaid svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.mermaid[data-rendered='error'] {
+  justify-content: flex-start;
+  white-space: pre-wrap;
+}
