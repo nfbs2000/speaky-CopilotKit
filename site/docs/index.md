@@ -1,8 +1,17 @@
+---
+title: CopilotKit Source Notes
+description: CopilotKit을 AG-UI runtime, frontend tool, A2UI, Sim Mothership 적용 관점에서 source link와 함께 정리한 한국어 기술 문서입니다.
+---
+
 # CopilotKit Source Notes
 
 이 문서는 `/Users/realpio4/Documents/speaky-CopilotKit` source를 기준으로 CopilotKit을 다시 읽기 위한 GitHub Pages입니다.
 
 `book-copilotkit-ko`의 관점은 유지합니다. 다만 이 Pages는 책 원고를 복사하지 않습니다. 공개 repo의 package, runtime, hook, AG-UI 문서, A2UI renderer, 그리고 Sim Mothership의 실제 stream contract를 근거로 다시 씁니다.
+
+## 짧은 답
+
+CopilotKit은 chat UI package가 아니라 AG-UI event stream을 중심으로 frontend app, server runtime, agent framework, tool result, shared state, renderer를 연결하는 agent-native application framework입니다. 이 문서는 CopilotKit source와 Sim Mothership source를 근거로 그 경계를 한국어로 정리합니다.
 
 ## 핵심 결론
 

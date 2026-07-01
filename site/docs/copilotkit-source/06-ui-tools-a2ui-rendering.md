@@ -1,6 +1,15 @@
+---
+title: UI Tools와 A2UI
+description: useFrontendTool, useRenderTool, useHumanInTheLoop, A2UI renderer의 경계를 코드 레벨로 정리하고 tool result ownership을 설명합니다.
+---
+
 # 6. UI Tools와 A2UI
 
 이 장은 CopilotKit의 frontend tool, renderer, HITL, A2UI를 코드 레벨로 봅니다. 핵심은 다음 구분입니다.
+
+## 짧은 답
+
+`useFrontendTool`은 agent가 호출할 수 있는 capability를 등록하고, `useRenderTool`은 tool call/result를 보여주는 projection만 등록합니다. `useHumanInTheLoop`은 사용자 결정을 tool result로 되돌리고, A2UI는 catalog 기반 UI operation surface입니다. backend execution ownership은 renderer가 아니라 runtime에 남아야 합니다.
 
 ```text
 handler는 agent가 호출하는 capability다.

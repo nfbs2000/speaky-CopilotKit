@@ -1,6 +1,15 @@
+---
+title: Mothership 적용 설계
+description: Sim Mothership stream-v1을 source of truth로 유지하면서 CopilotKit과 AG-UI adapter로 투영하는 설계안을 설명합니다.
+---
+
 # 7. Mothership 적용 설계
 
 이 장은 CopilotKit/AG-UI를 Sim Mothership 같은 application layer에 붙이는 설계를 다룹니다. 결론부터 말하면, Mothership protocol을 CopilotKit tool card 안으로 집어넣으면 안 됩니다. Mothership protocol을 원천으로 유지하고, 그 stream을 AG-UI event와 CopilotKit renderer로 투영해야 합니다.
+
+## 짧은 답
+
+Mothership에 CopilotKit을 붙일 때 source of truth는 Mothership stream-v1이어야 합니다. CopilotKit은 Mothership의 tool, checkpoint, resource, subagent span을 AG-UI event와 renderer로 투영하는 layer가 되어야 하며, backend tool execution과 checkpoint resume ownership을 frontend tool card가 가져가면 안 됩니다.
 
 ## Mothership은 이미 application protocol을 갖고 있다
 

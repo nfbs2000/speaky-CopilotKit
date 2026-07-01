@@ -1,6 +1,15 @@
+---
+title: Core와 Runtime 코드 경로
+description: CopilotKitProvider에서 CopilotKitCore, AgentRegistry, RunHandler, CopilotRuntime SSE까지 이어지는 실제 코드 경로를 설명합니다.
+---
+
 # 4. Core와 Runtime 코드 경로
 
 이 장은 CopilotKit을 코드 실행 경로로 다시 읽습니다. 핵심 질문은 다음입니다.
+
+## 짧은 답
+
+React app은 `CopilotKitProvider`로 core를 만들고, hooks로 context/tools/renderers를 등록합니다. `RunHandler`는 agent에게 tools/context/props를 보내고, assistant tool call을 발견하면 frontend handler를 실행한 뒤 `role: "tool"` message를 삽입합니다. `followUp !== false`이면 agent가 tool result를 읽도록 run을 이어갑니다.
 
 ```text
 React 앱에서 사용자가 agent에게 요청을 보내면,

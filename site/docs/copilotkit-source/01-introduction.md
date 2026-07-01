@@ -1,6 +1,15 @@
+---
+title: CopilotKit 소개
+description: CopilotKit을 chat UI가 아니라 AG-UI event stream으로 앱, runtime, agent, tool, state, renderer를 연결하는 framework로 설명합니다.
+---
+
 # 1. CopilotKit 소개
 
 CopilotKit을 “채팅창 라이브러리”로 읽으면 핵심이 빠집니다. repo의 중심은 chat component가 아니라 앱, runtime, agent, tool, state, renderer를 하나의 interaction boundary로 묶는 구조입니다.
+
+## 짧은 답
+
+CopilotKit은 앱이 agent에게 context, tools, shared state, renderer, human decision을 열고, agent runtime이 AG-UI event stream으로 결과를 돌려주는 framework입니다. 핵심 객체는 `CopilotKitCore`, `RunHandler`, `AgentRegistry`, `CopilotRuntime`이며, tool result는 UI card에서 끝나는 것이 아니라 agent observation으로 돌아가야 합니다.
 
 정확한 한 문장 정의는 다음입니다.
 

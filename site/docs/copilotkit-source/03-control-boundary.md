@@ -1,10 +1,17 @@
+---
+title: 모델과 CopilotKit의 통제 경계
+description: CopilotKit이 모델을 통제하는지 모델이 CopilotKit을 통제하는지 RunHandler, frontend tool, followUp 경계로 설명합니다.
+---
+
 # 3. 모델과 CopilotKit의 통제 경계
 
 질문은 이것입니다.
 
 > CopilotKit이 모델을 통제하는가? 아니면 모델이 CopilotKit을 통제하는가?
 
-짧은 답은 둘 다 아닙니다.
+## 짧은 답
+
+둘 다 아닙니다. 앱은 CopilotKit으로 capability boundary를 열고, 모델 또는 agent는 그 boundary 안에서 tool call을 선택합니다. CopilotKit은 handler 실행, renderer 표시, tool result message 삽입, follow-up run을 연결합니다. domain runtime은 observation을 읽고 다음 action을 결정합니다.
 
 정확한 답은 다음입니다.
 

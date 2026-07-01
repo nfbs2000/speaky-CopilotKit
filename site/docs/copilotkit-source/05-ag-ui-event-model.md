@@ -1,6 +1,15 @@
+---
+title: AG-UI 이벤트 모델
+description: AG-UI를 typed event stream으로 보고 lifecycle, text, tool, state, activity, custom event를 CopilotKit source 기준으로 설명합니다.
+---
+
 # 5. AG-UI 이벤트 모델
 
 CopilotKit을 AG-UI 관점에서 보면 설계가 더 선명해집니다. AG-UI는 “React component를 agent가 직접 조작하는 방식”이 아닙니다. AG-UI는 agent와 frontend가 주고받는 typed event stream입니다.
+
+## 짧은 답
+
+AG-UI는 agent와 frontend 사이의 event protocol입니다. agent는 `run(input) -> Observable<BaseEvent>` 형태로 lifecycle, text, tool, state, activity, custom event를 흘리고, CopilotKit runtime은 이를 SSE로 전달하며, frontend core는 message/state/tool renderer로 투영합니다.
 
 ## AG-UI의 기본 모델
 

@@ -1,6 +1,15 @@
+---
+title: CopilotKit Monorepo 지도
+description: speaky-CopilotKit monorepo의 core, react-core, runtime, A2UI, AG-UI 문서 위치와 읽는 순서를 정리합니다.
+---
+
 # 2. CopilotKit Monorepo 지도
 
 CopilotKit을 제대로 읽으려면 package 경계를 먼저 봐야 합니다. 이 repo는 단일 React widget이 아니라 frontend core, React hooks, runtime, AG-UI adapter, A2UI renderer, examples, docs, bot surface가 같이 있는 monorepo입니다.
+
+## 짧은 답
+
+CopilotKit repo는 `@copilotkit/core`, `@copilotkit/react-core`, `@copilotkit/runtime`, `@copilotkit/a2ui-renderer`, AG-UI docs/skills, examples로 나뉩니다. CopilotKit을 이해하려면 UI package보다 `packages/core/src/core/run-handler.ts`, `packages/runtime/src/v2/runtime`, `packages/react-core/src/v2/hooks`를 먼저 읽어야 합니다.
 
 ## 전체 구조
 
