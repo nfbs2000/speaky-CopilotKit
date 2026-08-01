@@ -6,7 +6,7 @@
     <title>외부 링크 부록</title>
     <meta
       name="description"
-      content="Mothership 경계 문서에서 참조하는 외부 repository 분석 페이지와 source link 부록."
+      content="CopilotKit, Ghost, TradingAgents GitHub Pages와 source link를 한곳에 모은 공개 부록."
     />
     <meta name="theme-color" content="#0f172a" />
     <link rel="stylesheet" href="./styles.css" />
@@ -17,7 +17,7 @@
         <span class="brand-mark" aria-hidden="true">M</span>
         <span>
           <strong>외부 링크 부록</strong>
-          <small>Mothership connected analysis</small>
+          <small>published page index</small>
         </span>
       </a>
       <nav class="top-links" aria-label="상단 내비게이션">
@@ -46,8 +46,8 @@
               <span>외부 분석 링크.</span>
             </h1>
             <p class="lede">
-              <span>이 부록은 CopilotKit 경계 문서에서 외부 target 분석 페이지로 나가는 출구다.</span>
-              <span>각 repository는 Mothership 관점의 ownership, 위험도, 검증 기준을 따로 문서화한다.</span>
+              <span>이 부록은 이번 작업에서 만든 공개 GitHub Pages를 한곳에 모은 색인이다.</span>
+              <span>CopilotKit, Ghost, TradingAgents 페이지를 따로 찾아다니지 않도록 대표 URL과 세부 장 URL을 같이 둔다.</span>
             </p>
             <div class="contract-strip" role="list" aria-label="부록 핵심">
               <div role="listitem">
@@ -56,15 +56,15 @@
               </div>
               <div role="listitem">
                 <strong>Ghost</strong>
-                <span>publishing platform monorepo와 Mothership 외부 target 계약.</span>
+                <span>Ghost publishing platform monorepo 구조 소개.</span>
+              </div>
+              <div role="listitem">
+                <strong>TradingAgents</strong>
+                <span>소스 읽기 책과 Claude Code workflow 강의 장.</span>
               </div>
               <div role="listitem">
                 <strong>source first</strong>
                 <span>페이지는 local checkout 분석과 source link를 기준으로 유지한다.</span>
-              </div>
-              <div role="listitem">
-                <strong>deploy note</strong>
-                <span>Ghost Pages는 repository Pages 활성화 후 배포된다.</span>
               </div>
             </div>
           </div>
@@ -75,7 +75,7 @@
             <p class="eyebrow">repositories</p>
             <h2>repository 링크</h2>
             <p>
-              Mothership이 함께 다루는 외부 repository와 해당 분석 페이지 source다.
+              공개 페이지가 읽고 있는 repository와 해당 분석 페이지 source다.
             </p>
           </div>
           <div class="table-wrap">
@@ -101,6 +101,12 @@
                   <td>Ghost publishing platform fork</td>
                   <td>monorepo layer, Ghost core, admin/public widgets, Koenig, 검증 gate</td>
                 </tr>
+                <tr>
+                  <td>TradingAgents</td>
+                  <td><a href="https://github.com/nfbs2000/speaky-TradingAgents">nfbs2000/speaky-TradingAgents</a></td>
+                  <td>TradingAgents 한국어 소스 읽기와 Claude Code 운영층 강의</td>
+                  <td>LangGraph 금융 workflow, `.claude` team/skill/workflow, 검증 루프</td>
+                </tr>
               </tbody>
             </table>
           </div>
@@ -111,22 +117,27 @@
             <p class="eyebrow">published pages</p>
             <h2>GitHub Pages 링크</h2>
             <p>
-              아래 URL은 GitHub Pages 배포 후 사용하는 외부 링크다. Ghost repository는
-              현재 local file과 workflow가 준비된 상태이며, GitHub repository Pages를
-              Actions mode로 활성화한 뒤 push하면 같은 URL로 배포된다.
+              아래 URL은 공개 배포된 GitHub Pages다. 새 페이지를 만들면 이 부록에 즉시
+              추가해서 누락 없이 추적한다.
             </p>
           </div>
           <div class="rule-list">
             <div class="rule good">
-              <strong>활성 페이지</strong>
+              <strong>CopilotKit 계열</strong>
               <span><a href="https://nfbs2000.github.io/speaky-CopilotKit/">CopilotKit x Mothership 경계 문서</a></span>
               <span><a href="https://nfbs2000.github.io/speaky-CopilotKit/opencode-coexistence.html">OpenCode-backed Mothership 공존안</a></span>
-              <span><a href="./index.html">현재 repository의 local relative page</a></span>
+              <span><a href="https://nfbs2000.github.io/speaky-CopilotKit/external-links.html">외부 링크 부록</a></span>
             </div>
             <div class="rule good">
               <strong>Ghost 분석 페이지</strong>
               <span><a href="https://nfbs2000.github.io/speaky-Ghost/">speaky-Ghost 분석 GitHub Pages</a></span>
               <span><a href="https://github.com/nfbs2000/speaky-Ghost/tree/main/github-pages">Ghost page source directory</a></span>
+            </div>
+            <div class="rule good">
+              <strong>TradingAgents 강의 페이지</strong>
+              <span><a href="https://nfbs2000.github.io/speaky-TradingAgents/">TradingAgents 소스 읽기</a></span>
+              <span><a href="https://nfbs2000.github.io/speaky-TradingAgents/part5/ch13-claude-workflow.html">13장: Claude Code 워크플로우</a></span>
+              <span><a href="https://github.com/nfbs2000/speaky-TradingAgents/blob/main/.claude/workflows/ta-problem-solver.js">ta-problem-solver.js source</a></span>
             </div>
           </div>
         </section>
@@ -136,15 +147,16 @@
             <p class="eyebrow">appendix rule</p>
             <h2>부록 유지 규칙</h2>
             <p>
-              외부 링크는 단순 bookmark가 아니라 Mothership 경계 문서의 일부다.
-              새 repository를 추가할 때는 source, Pages URL, ownership 규칙,
+              외부 링크는 단순 bookmark가 아니라 공개 산출물의 목록이다.
+              새 repository나 새 Pages 장을 추가할 때는 source, Pages URL,
               검증 기준을 같이 적는다.
             </p>
           </div>
           <ol class="checklist">
+            <li>새로 만든 공개 Pages는 이 부록에 반드시 추가한다.</li>
             <li>외부 target의 source repository URL을 남긴다.</li>
             <li>GitHub Pages 배포 URL을 남긴다.</li>
-            <li>Mothership이 무엇을 소유하고 target이 무엇을 소유하는지 구분한다.</li>
+            <li>페이지가 설명하는 범위와 설명하지 않는 범위를 구분한다.</li>
             <li>완료 판정에 필요한 test/API/UI/readback evidence를 명시한다.</li>
             <li>Pages가 아직 활성화되지 않은 경우 배포 전제 조건을 숨기지 않는다.</li>
           </ol>
