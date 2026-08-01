@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc" viewBox="0 0 1280 720">
+  <title id="title">Mothership과 CopilotKit의 안전한 stream 경계</title>
+  <desc id="desc">Mothership이 native/provider stream을 소유하고 CopilotKit은 AG-UI projection만 소비하는 구성을 보여준다.</desc>
+  <defs>
+    <marker id="arrow-blue" markerWidth="12" markerHeight="12" refX="8" refY="6" orient="auto">
+      <path d="M2,2 L10,6 L2,10 Z" fill="#2563eb" />
+    </marker>
+    <marker id="arrow-green" markerWidth="12" markerHeight="12" refX="8" refY="6" orient="auto">
+      <path d="M2,2 L10,6 L2,10 Z" fill="#0f766e" />
+    </marker>
+    <filter id="shadow" x="-10%" y="-20%" width="120%" height="150%">
+      <feDropShadow dx="0" dy="12" stdDeviation="14" flood-color="#0f172a" flood-opacity="0.12" />
+    </filter>
+  </defs>
+  <rect width="1280" height="720" rx="22" fill="#f6f7f3" />
+  <rect x="56" y="52" width="1168" height="616" rx="18" fill="#ffffff" stroke="#d7ded9" />
+
+  <text x="92" y="104" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="24" font-weight="700" fill="#111827">안전한 공존 구성</text>
+  <text x="92" y="134" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="15" fill="#475569">Mothership이 native event를 먼저 소비하고 CopilotKit은 AG-UI projection만 소비한다.</text>
+
+  <g filter="url(#shadow)">
+    <rect x="92" y="190" width="176" height="92" rx="10" fill="#eef4ff" stroke="#b8cdf8" />
+    <text x="180" y="227" text-anchor="middle" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="17" font-weight="700" fill="#1e3a8a">브라우저</text>
+    <text x="180" y="253" text-anchor="middle" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="13" fill="#334155">CopilotKit UI</text>
+
+    <rect x="340" y="190" width="186" height="92" rx="10" fill="#eef4ff" stroke="#b8cdf8" />
+    <text x="433" y="227" text-anchor="middle" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="17" font-weight="700" fill="#1e3a8a">런타임</text>
+    <text x="433" y="253" text-anchor="middle" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="13" fill="#334155">라우팅 / 미들웨어</text>
+
+    <rect x="598" y="190" width="182" height="92" rx="10" fill="#eef4ff" stroke="#b8cdf8" />
+    <text x="689" y="227" text-anchor="middle" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="17" font-weight="700" fill="#1e3a8a">HttpAgent</text>
+    <text x="689" y="253" text-anchor="middle" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="13" fill="#334155">AG-UI client</text>
+
+    <rect x="858" y="190" width="236" height="92" rx="10" fill="#ecfdf5" stroke="#99d7c5" />
+    <text x="976" y="227" text-anchor="middle" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="17" font-weight="700" fill="#064e3b">Mothership</text>
+    <text x="976" y="253" text-anchor="middle" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="13" fill="#334155">AG-UI endpoint</text>
+  </g>
+
+  <path d="M270 236 H333" stroke="#2563eb" stroke-width="3" marker-end="url(#arrow-blue)" />
+  <path d="M529 236 H591" stroke="#2563eb" stroke-width="3" marker-end="url(#arrow-blue)" />
+  <path d="M782 236 H850" stroke="#2563eb" stroke-width="3" marker-end="url(#arrow-blue)" />
+  <text x="313" y="214" text-anchor="middle" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="12" fill="#2563eb">POST</text>
+  <text x="560" y="214" text-anchor="middle" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="12" fill="#2563eb">route</text>
+  <text x="817" y="214" text-anchor="middle" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="12" fill="#2563eb">RunAgentInput</text>
+
+  <g filter="url(#shadow)">
+    <rect x="312" y="420" width="210" height="98" rx="10" fill="#fff7ed" stroke="#f0bf7a" />
+    <text x="417" y="457" text-anchor="middle" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="17" font-weight="700" fill="#8a3f0b">evidence 저장소</text>
+    <text x="417" y="483" text-anchor="middle" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="13" fill="#334155">native timeline / DB</text>
+
+    <rect x="620" y="420" width="230" height="98" rx="10" fill="#ecfdf5" stroke="#99d7c5" />
+    <text x="735" y="457" text-anchor="middle" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="17" font-weight="700" fill="#064e3b">Mothership runtime</text>
+    <text x="735" y="483" text-anchor="middle" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="13" fill="#334155">run / turn / permission</text>
+
+    <rect x="948" y="420" width="206" height="98" rx="10" fill="#ecfdf5" stroke="#99d7c5" />
+    <text x="1051" y="457" text-anchor="middle" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="17" font-weight="700" fill="#064e3b">Provider runtime</text>
+    <text x="1051" y="483" text-anchor="middle" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="13" fill="#334155">native session</text>
+  </g>
+
+  <path d="M978 284 V354 C978 396 942 469 858 469" stroke="#0f766e" stroke-width="3" fill="none" marker-end="url(#arrow-green)" />
+  <path d="M850 469 H940" stroke="#0f766e" stroke-width="3" marker-end="url(#arrow-green)" />
+  <path d="M948 489 H858" stroke="#0f766e" stroke-width="3" marker-end="url(#arrow-green)" />
+  <path d="M620 489 H532" stroke="#b45309" stroke-width="3" marker-end="url(#arrow-green)" />
+  <path d="M735 420 C735 356 828 335 922 285" stroke="#0f766e" stroke-width="3" fill="none" marker-end="url(#arrow-green)" />
+
+  <text x="935" y="372" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="13" font-weight="700" fill="#064e3b">native stream 소유자</text>
+  <text x="886" y="454" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="12" fill="#0f766e">SDK event</text>
+  <text x="886" y="512" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="12" fill="#0f766e">관찰 event</text>
+  <text x="536" y="454" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="12" fill="#b45309">raw evidence</text>
+
+  <rect x="92" y="590" width="1090" height="42" rx="8" fill="#f8fafc" stroke="#d7ded9" />
+  <text x="116" y="616" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="14" font-weight="700" fill="#111827">불변식:</text>
+  <text x="184" y="616" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="14" fill="#334155">CopilotKit은 AG-UI를 proxy할 수 있다. native/provider stream의 첫 소비자는 Mothership이어야 한다.</text>
+</svg>

@@ -1,0 +1,636 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Mothership x CopilotKit 경계 문서</title>
+    <meta
+      name="description"
+      content="Mothership과 CopilotKit 공존 경계 문서. native stream 소유권, AG-UI 투영, followUp false 모드, tool 권한, 저장, 보안 기준을 정리한다."
+    />
+    <meta name="theme-color" content="#0f172a" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="#top" aria-label="Mothership 경계 문서 홈">
+        <span class="brand-mark" aria-hidden="true">M</span>
+        <span>
+          <strong>Mothership 경계</strong>
+          <small>CopilotKit 공존 계약</small>
+        </span>
+      </a>
+      <nav class="top-links" aria-label="상단 내비게이션">
+        <a href="#contract">핵심 계약</a>
+        <a href="#mothership">Mothership</a>
+        <a href="#topologies">구성 선택</a>
+        <a href="#checklist">체크리스트</a>
+        <a href="./external-links.html">외부 링크</a>
+      </nav>
+    </header>
+
+    <div class="page-shell" id="top">
+      <aside class="side-nav" aria-label="문서 섹션">
+        <a href="#contract" aria-current="true">핵심 계약</a>
+        <a href="#mothership">Mothership 기준</a>
+        <a href="#mothership-core">공통 코어</a>
+        <a href="#ownership">역할 비교</a>
+        <a href="#topologies">구성 선택</a>
+        <a href="#mapping">ID 매핑</a>
+        <a href="#stream">스트림 변환</a>
+        <a href="#followup">followUp false</a>
+        <a href="#tools">툴 경계</a>
+        <a href="#permission">권한 루프</a>
+        <a href="#security">저장과 보안</a>
+        <a href="#checklist">체크리스트</a>
+        <a href="#sources">출처</a>
+      </aside>
+
+      <main>
+        <section class="hero" id="contract">
+          <div class="hero-copy">
+            <p class="eyebrow">2026-08-01 아키텍처 결정</p>
+            <h1>
+              <span>Mothership과</span>
+              <span>CopilotKit은</span>
+              <span>실행 원천</span>
+              <span>소유권을</span>
+              <span>명확히 해야</span>
+              <span>공존할 수 있다.</span>
+            </h1>
+            <p class="lede">
+              <span>Mothership은 기존 자체 에이전트 실행/runtime surface다.</span>
+              <span>CopilotKit은 FrontendTool, RunHandler, AG-UI UI/runtime이다.</span>
+              <span>Mothership native stream과 evidence를 CopilotKit이 대신 소유하면</span>
+              <span>권한, 질문, tool result, 완료 판정이 깨진다.</span>
+            </p>
+            <div class="contract-strip" role="list" aria-label="핵심 불변식">
+              <div role="listitem">
+                <strong>Mothership 우선</strong>
+                <span>기존 Mothership runtime이 run/turn/native stream을 소유한다.</span>
+              </div>
+              <div role="listitem">
+                <strong>projection은 그 다음</strong>
+                <span>CopilotKit은 Mothership이 투영한 AG-UI event만 받는다.</span>
+              </div>
+              <div role="listitem">
+                <strong>evidence가 판정</strong>
+                <span>완료 판정은 Mothership evidence/readback 기준이다.</span>
+              </div>
+              <div role="listitem">
+                <strong>CopilotKit 옵션</strong>
+                <span><code>followUp</code>은 <code>FrontendTool</code>의 자동 재실행 설정이다.</span>
+              </div>
+            </div>
+          </div>
+          <figure class="hero-diagram">
+            <picture>
+              <source media="(max-width: 760px)" srcset="./assets/boundary-map-mobile.svg" />
+              <img src="./assets/boundary-map.svg" alt="CopilotKit이 Mothership AG-UI projection만 소비하는 안전한 구성" />
+            </picture>
+          </figure>
+        </section>
+
+        <section class="callout critical">
+          <h2>한 줄 규칙</h2>
+          <p>
+            <span>Mothership native stream은 원천이다.</span>
+            <span>기존 Mothership runtime이 먼저 받는다.</span>
+            <span>CopilotKit은 AG-UI projection만 받는다.</span>
+          </p>
+        </section>
+
+        <section id="mothership" class="content-section split">
+          <div class="section-heading">
+            <p class="eyebrow">Mothership baseline</p>
+            <h2>Mothership이 여기서 의미하는 것</h2>
+            <p>
+              이 문서의 Mothership은 이미 자체 에이전트 실행 방식, session,
+              stream 소비, tool result, permission/question loop, evidence 저장을 가진
+              기존 runtime이다.
+              CopilotKit은 이 실행 원천을 대체하지 않고 AG-UI projection과
+              UI/runtime layer로 붙어야 한다.
+            </p>
+            <p>
+              공개 문서에는 내부 파일 경로나 비공개 구현명을 쓰지 않는다.
+              기준은 "기존 Mothership이 먼저 실행하고 먼저 관찰한다"는 ownership이다.
+            </p>
+          </div>
+          <div class="rule-list">
+            <div class="rule good">
+              <strong>Mothership이 소유한다</strong>
+              <span>기존 agent session과 후속 turn session reuse</span>
+              <span>provider/native stream의 첫 소비와 event persistence</span>
+              <span>permission/question pending state와 같은 session으로 되돌리는 응답 loop</span>
+              <span>backend tool call/result 원본과 agent 의사결정용 결과</span>
+              <span>turn completion, interruption, evidence archive, readback</span>
+            </div>
+            <div class="rule bad">
+              <strong>CopilotKit에 넘기면 안 된다</strong>
+              <span>provider/native stream의 첫 소비자 역할</span>
+              <span>기존 agent session id 생성/재사용 판단</span>
+              <span>permission/question을 browser-local fake approval로 처리하는 흐름</span>
+              <span>tool result를 CopilotKit renderer 성공 표시로 대체하는 흐름</span>
+              <span>assistant text만으로 완료 판정하는 흐름</span>
+              <span>Mothership DB/evidence 없이 CopilotKit runner store만 durable record로 쓰는 흐름</span>
+            </div>
+          </div>
+        </section>
+
+        <section id="mothership-core" class="content-section">
+          <div class="section-heading">
+            <p class="eyebrow">Mothership common core</p>
+            <h2>Mothership의 공통 부분</h2>
+            <p>
+              Mothership의 공통부는 특정 UI, card, chat bubble이 아니다.
+              기존 Mothership 방식에서 반복되는 핵심은 native 실행을 시작하고,
+              그 실행의 원본 event와 증거를 잃지 않고, 사람이 보는 화면으로 투영하는
+              control kernel이다.
+            </p>
+          </div>
+          <div class="decision-grid" aria-label="Mothership 공통 코어">
+            <div>
+              <strong>실행 identity</strong>
+              <span><code>runId</code>, <code>turnId</code>, provider/native session id</span>
+              <span>후속 turn이 같은 agent session을 재사용하는 규칙</span>
+              <span>새 session은 명시적인 새 run에서만 만드는 lifecycle</span>
+            </div>
+            <div>
+              <strong>native event ledger</strong>
+              <span>provider/native stream 수신</span>
+              <span>raw event identity와 correlation id 보존</span>
+              <span>timeline, transcript, evidence archive</span>
+            </div>
+            <div>
+              <strong>interaction loop</strong>
+              <span>permission/question pending state</span>
+              <span>pending interaction에 대한 approve/deny/answer callback</span>
+              <span>응답 뒤 같은 native session에서 계속 흐르는 stream</span>
+            </div>
+            <div>
+              <strong>tool result integrity</strong>
+              <span>backend/domain tool call과 result 원본</span>
+              <span>기존 agent가 다음 행동을 결정할 수 있는 result 보존</span>
+              <span>renderer 표시가 원본 result를 대체하지 않는 규칙</span>
+            </div>
+            <div>
+              <strong>completion evidence</strong>
+              <span>assistant text가 아니라 turn completion/readback으로 판정</span>
+              <span>interruption, failure, timeout을 성공처럼 만들지 않는 규칙</span>
+              <span>Opik/trace evidence는 검증된 receipt가 있을 때만 success</span>
+            </div>
+            <div>
+              <strong>projection adapters</strong>
+              <span>Mothership UI, transcript, status projection</span>
+              <span>CopilotKit AG-UI bridge는 이 projection 중 하나</span>
+              <span>projection은 source of truth가 아니다</span>
+            </div>
+          </div>
+        </section>
+
+        <section id="ownership" class="content-section">
+          <div class="section-heading">
+            <p class="eyebrow">경계 비교</p>
+            <h2>역할 비교</h2>
+            <p>
+              이 구조에서 CopilotKit은 실행 권한의 주인이 아니다. CopilotKit은
+              agent UI와 AG-UI runtime layer다. 기존 에이전트 실행의 control plane은
+              Mothership에 남아 있어야 한다.
+            </p>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>영역</th>
+                  <th>Mothership</th>
+                  <th>CopilotKit</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>주요 역할</td>
+                  <td>기존 에이전트 실행과 evidence를 소유하는 runtime/control plane</td>
+                  <td>agent 상호작용을 위한 UI/runtime framework</td>
+                </tr>
+                <tr>
+                  <td>native 실행 소유자</td>
+                  <td>agent session, backend tool, permission/question 응답</td>
+                  <td>등록된 AG-UI agent에 실행을 위임</td>
+                </tr>
+                <tr>
+                  <td>stream 원천</td>
+                  <td>기존 Mothership native/provider event</td>
+                  <td>SSE로 흐르는 AG-UI <code>BaseEvent</code> stream</td>
+                </tr>
+                <tr>
+                  <td>저장 소유자</td>
+                  <td>Mothership DB, native timeline, tool ledger, evidence readback</td>
+                  <td><code>AgentRunner</code> thread/event store</td>
+                </tr>
+                <tr>
+                  <td>완료 판정</td>
+                  <td>관찰된 native stream, tool result, evidence readback</td>
+                  <td><code>RUN_FINISHED</code> 같은 AG-UI lifecycle projection</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="topologies" class="content-section">
+          <div class="section-heading">
+            <p class="eyebrow">의도적으로 선택할 것</p>
+            <h2>구성 선택</h2>
+            <p>
+              "CopilotKit이 가로채면 Mothership이 못 받는다"는 걱정은
+              CopilotKit이 Mothership보다 upstream에 있을 때 맞다. Mothership을
+              upstream에 두면 CopilotKit이 소비하는 것은 의도적으로 공개한
+              AG-UI projection이다.
+            </p>
+          </div>
+
+          <div class="tab-control" role="tablist" aria-label="구성 선택">
+            <button type="button" role="tab" aria-selected="true" data-topology="runtime">런타임 bridge</button>
+            <button type="button" role="tab" aria-selected="false" data-topology="self">직접 연결</button>
+            <button type="button" role="tab" aria-selected="false" data-topology="tee">runner tee</button>
+            <button type="button" role="tab" aria-selected="false" data-topology="danger">위험 구성</button>
+          </div>
+
+          <div class="topology-panel" data-panel="runtime">
+            <div>
+              <h3>CopilotKit Runtime을 거치는 Mothership bridge</h3>
+              <p>
+                Browser -> CopilotKit Runtime -> <code>HttpAgent</code> ->
+                Mothership AG-UI endpoint -> existing Mothership native session.
+              </p>
+              <p>
+                CopilotKit runtime routing, middleware, 표준 component를 쓰면서도
+                native 실행 소유권을 Mothership에 남기고 싶을 때 이 구성을 쓴다.
+              </p>
+            </div>
+            <pre><code>const runtime = new CopilotRuntime({
+  agents: {
+    mothership: new HttpAgent({
+      url: process.env.MOTHERSHIP_AGUI_URL!,
+    }),
+  },
+  runner: new InMemoryAgentRunner(),
+});</code></pre>
+          </div>
+
+          <div class="topology-panel" data-panel="self" hidden>
+            <div>
+              <h3>직접 연결 Mothership agent</h3>
+              <p>
+                Browser -> <code>HttpAgent</code> -> Mothership AG-UI endpoint.
+                이 agent는 CopilotKit Runtime을 우회한다.
+              </p>
+              <p>
+                runtime interception 자체가 문제라면 이 구성을 쓴다. 대신 인증,
+                권한, CORS, rate limit, replay는 Mothership endpoint가 직접 책임진다.
+              </p>
+            </div>
+            <pre><code>&lt;CopilotKit
+  runtimeUrl="/api/copilotkit"
+  selfManagedAgents={{ mothership: mothershipAgent }}
+&gt;
+  &lt;CopilotChat agentId="mothership" /&gt;
+&lt;/CopilotKit&gt;</code></pre>
+          </div>
+
+          <div class="topology-panel" data-panel="tee" hidden>
+            <div>
+              <h3>런타임 custom runner tee</h3>
+              <p>
+                Browser -> CopilotKit Runtime -> custom <code>AgentRunner</code> ->
+                SDK/Mothership. CopilotKit이 agent를 실행해야 하지만 Mothership도
+                모든 AG-UI event를 관찰해야 할 때 쓰는 구성이다.
+              </p>
+              <p>
+                이 방식은 기본적으로 projection-level AG-UI event를 관찰한다.
+                provider-native chunk까지 필요하면 SDK adapter 단계에서 raw tee를
+                별도로 넣어야 한다.
+              </p>
+            </div>
+            <pre><code>class MothershipRunner extends InMemoryAgentRunner {
+  override run(request) {
+    // event를 Mothership에 persist/tee한 뒤 위임한다.
+    return super.run(request);
+  }
+}</code></pre>
+          </div>
+
+          <div class="topology-panel danger-panel" data-panel="danger" hidden>
+            <div>
+              <h3>위험한 구성</h3>
+              <p>
+                Browser -> CopilotKit Runtime -> BuiltInAgent/direct SDK adapter ->
+                provider SDK stream.
+              </p>
+              <p>
+                Mothership이 실행을 통제하거나 검증해야 한다면 이 구성은 쓰면 안 된다.
+                Mothership이 stream 경로 밖에 있으므로 single-consumer SDK stream을
+                놓칠 수 있다. 명시적인 tee를 추가하거나 실행을 Mothership 뒤로 옮겨야 한다.
+              </p>
+            </div>
+            <pre><code>// 위험: CopilotKit이 SDK call을 소유한다.
+const runtime = new CopilotRuntime({
+  agents: {
+    default: new BuiltInAgent({ model: "..." }),
+  },
+});</code></pre>
+          </div>
+        </section>
+
+        <section id="mapping" class="content-section">
+          <div class="section-heading">
+            <p class="eyebrow">상관관계 계약</p>
+            <h2>ID 매핑</h2>
+            <p>
+              CopilotKit thread 변경은 Mothership이 native run에 매핑하기 전까지
+              UI-level event일 뿐이다. browser reconnect 때문에 새 provider session이
+              우발적으로 생기면 안 된다.
+            </p>
+          </div>
+          <div class="mapping-grid">
+            <div><strong><code>agentId</code></strong><span>Mothership 화면/agent 표면. 보통 <code>mothership</code>으로 고정한다.</span></div>
+            <div><strong><code>threadId</code></strong><span>하나의 Mothership <code>runId</code>에 매핑한다.</span></div>
+            <div><strong><code>runId</code></strong><span>Mothership <code>turnId</code> 또는 correlation id에 매핑한다.</span></div>
+            <div><strong><code>messageId</code></strong><span>native message correlation에 매핑하고 browser에는 sanitized id만 노출한다.</span></div>
+            <div><strong>provider session id</strong><span>Mothership 내부 runtime session id다. browser가 소유하지 않는다.</span></div>
+          </div>
+        </section>
+
+        <section id="stream" class="content-section">
+          <div class="section-heading">
+            <p class="eyebrow">Mothership에서 AG-UI로</p>
+            <h2>스트림 변환 계약</h2>
+            <p>
+              Mothership AG-UI endpoint는 <code>RunAgentInput</code>을 받고
+              <code>text/event-stream</code>을 반환한다. provider chunk를 그대로
+              흘리는 것이 아니라 Mothership event를 AG-UI event로 변환한다.
+            </p>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Mothership 관찰값</th>
+                  <th>AG-UI event 계열</th>
+                  <th>규칙</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>turn accepted</td>
+                  <td><code>RUN_STARTED</code></td>
+                  <td>AG-UI run마다 한 번만 emit하고 stable id를 포함한다.</td>
+                </tr>
+                <tr>
+                  <td>assistant text delta</td>
+                  <td><code>TEXT_MESSAGE_CHUNK</code> 또는 start/content/end</td>
+                  <td>빈 delta는 emit하지 않는다.</td>
+                </tr>
+                <tr>
+                  <td>tool call과 args</td>
+                  <td><code>TOOL_CALL_START</code>, <code>TOOL_CALL_ARGS</code></td>
+                  <td><code>toolCallId</code>와 JSON-stable args를 보존한다.</td>
+                </tr>
+                <tr>
+                  <td>tool result 관찰</td>
+                  <td><code>TOOL_CALL_END</code>, <code>TOOL_CALL_RESULT</code></td>
+                  <td>tool 성공 여부는 Mothership evidence로 판정한다.</td>
+                </tr>
+                <tr>
+                  <td>state snapshot 또는 delta</td>
+                  <td><code>STATE_SNAPSHOT</code>, <code>STATE_DELTA</code></td>
+                  <td>host secret이 아니라 sanitized status만 노출한다.</td>
+                </tr>
+                <tr>
+                  <td>native error 또는 completion</td>
+                  <td><code>RUN_ERROR</code>, <code>RUN_FINISHED</code></td>
+                  <td>Mothership completion 기준을 만족한 뒤에만 emit한다.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="followup" class="content-section followup-section">
+          <div class="section-heading">
+            <p class="eyebrow">frontend tool 후속 실행</p>
+            <h2><code>followUp: false</code>는 겹침 차단 스위치다</h2>
+            <p>
+              정확한 옵션명은 <code>followUp</code>이다. <code>followup</code>이 아니다.
+              이건 Mothership 속성이 아니라 CopilotKit <code>FrontendTool</code> 옵션이다.
+              CopilotKit <code>RunHandler</code>는 tool handler가 끝난 뒤
+              <code>tool?.followUp !== false</code>이면 agent를 다시 실행한다.
+              <code>followUp: false</code>는 그 자동 재실행만 끊는다.
+            </p>
+          </div>
+
+          <div class="followup-grid">
+            <div class="flow-card followup-on">
+              <h3>CopilotKit이 continuation을 소유하는 기본 흐름</h3>
+              <ol>
+                <li>agent가 frontend tool call을 emit한다.</li>
+                <li>browser가 등록된 handler를 실행한다.</li>
+                <li>CopilotKit이 <code>role: "tool"</code> result message를 삽입한다.</li>
+                <li><code>followUp !== false</code>라서 CopilotKit이 agent를 다시 실행한다.</li>
+                <li>model이 tool result를 읽고 다음 답변 또는 다음 tool call을 만든다.</li>
+              </ol>
+            </div>
+
+            <div class="flow-card followup-off">
+              <h3>Mothership이 continuation을 소유하는 bridge 흐름</h3>
+              <ol>
+                <li>agent가 Mothership bridge frontend tool을 호출한다.</li>
+                <li>browser handler가 Mothership API에 permission, answer, command를 전달한다.</li>
+                <li>CopilotKit은 tool result를 UI/message state에 기록한다.</li>
+                <li><code>followUp: false</code>가 CopilotKit의 두 번째 model run을 막는다.</li>
+                <li>Mothership native stream이 같은 session에서 continuation과 evidence를 만든다.</li>
+              </ol>
+            </div>
+          </div>
+
+          <div class="followup-rule">
+            <div>
+              <strong>Mothership bridge tool에는 CopilotKit 쪽에서 <code>followUp: false</code>를 둔다</strong>
+              <p>
+                의미는 "Mothership이 실행하지 말라"가 아니다. browser handler는 실행되고
+                Mothership API도 호출된다. 다만 CopilotKit이 tool result 직후 자기 agent를
+                자동으로 다시 돌리지 않는다. continuation은 Mothership의 같은 native session,
+                raw SSE, evidence projection이 만든다.
+              </p>
+            </div>
+            <pre><code>useFrontendTool({
+  name: "answer_mothership_question",
+  description: "Send a human answer back to the pending Mothership native question.",
+  parameters: z.object({
+    runId: z.string(),
+    requestId: z.string(),
+    answer: z.string(),
+  }),
+  followUp: false,
+  handler: async ({ runId, requestId, answer }) => {
+    await mothership.respondQuestion({ runId, requestId, answer });
+    return { accepted: true, owner: "mothership-native-session" };
+  },
+});</code></pre>
+          </div>
+
+          <div class="decision-grid" aria-label="followUp false 판단 기준">
+            <div>
+              <strong>false가 경계인 경우</strong>
+              <span><code>answer_mothership_question</code></span>
+              <span><code>approve_mothership_permission</code></span>
+              <span><code>send_mothership_turn</code></span>
+              <span><code>open_mothership_run</code></span>
+            </div>
+            <div>
+              <strong>기본 follow-up이 맞는 경우</strong>
+              <span>CopilotKit agent가 tool result를 읽고 답해야 하는 lookup</span>
+              <span>CopilotKit agent가 계산/검색 결과를 요약해야 하는 tool</span>
+              <span>Mothership을 거치지 않는 일반 app frontend tool</span>
+            </div>
+            <div>
+              <strong>잘못 쓰면 생기는 문제</strong>
+              <span>CopilotKit follow-up run과 Mothership native continuation이 race한다.</span>
+              <span>evidence 전에 CopilotKit assistant text가 완료처럼 보인다.</span>
+              <span>permission/question 응답이 같은 native session loop 밖에서 처리된 것처럼 보인다.</span>
+            </div>
+          </div>
+          <p class="fine-print">
+            정리하면 <code>followUp: false</code>는 CopilotKit의 자동 agent 재실행을 끄는
+            옵션이다. Mothership 실행, Mothership raw SSE, permission/question loop를 끄는
+            옵션이 아니다.
+          </p>
+        </section>
+
+        <section id="tools" class="content-section split">
+          <div class="section-heading">
+            <p class="eyebrow">tool 권한</p>
+            <h2>host tool을 frontend tool로 등록하지 않는다</h2>
+            <p>
+              filesystem, process, git mutation, renderer direct bridge 같은 실제 실행 도구는
+              native Mothership capability다.
+            </p>
+          </div>
+          <div class="rule-list">
+            <div class="rule good">
+              <strong>좁은 domain command만 노출한다</strong>
+              <span><code>request_mothership_change</code></span>
+              <span><code>approve_mothership_checkpoint</code></span>
+              <span><code>answer_mothership_question</code></span>
+              <span><code>show_mothership_evidence</code></span>
+            </div>
+            <div class="rule bad">
+              <strong>Mothership gate 뒤에 둔다</strong>
+              <span>host filesystem/process/git mutation</span>
+              <span>product-specific direct bridge</span>
+              <span>destructive tool permission</span>
+              <span>workspace path, role/tier gate</span>
+            </div>
+          </div>
+        </section>
+
+        <section id="permission" class="content-section">
+          <div class="section-heading">
+            <p class="eyebrow">사람 승인 루프</p>
+            <h2>permission은 Mothership session state다</h2>
+            <p>
+              CopilotKit은 approval UI를 렌더링할 수 있다. 하지만 source of truth가
+              되면 안 된다. 사용자의 결정은 Mothership을 호출해야 하고, Mothership은
+              같은 native session에 응답해야 한다.
+            </p>
+          </div>
+          <figure class="wide-diagram">
+            <img src="./assets/permission-loop.svg" alt="Mothership에서 CopilotKit UI를 거쳐 다시 같은 native session으로 돌아가는 permission round trip" />
+          </figure>
+        </section>
+
+        <section id="security" class="content-section split">
+          <div class="section-heading">
+            <p class="eyebrow">저장과 보안</p>
+            <h2>실제 작업의 기준은 Mothership evidence다</h2>
+            <p>
+              CopilotKit runner persistence는 UI thread replay에는 유용하다.
+              하지만 Mothership native 작업의 유일한 durable record가 되면 안 된다.
+            </p>
+          </div>
+          <div class="security-grid">
+            <div>
+              <h3>분리 저장</h3>
+              <p>raw provider/native event는 Mothership에 저장한다. AG-UI projection event는 CopilotKit runner나 browser state에 둘 수 있다.</p>
+            </div>
+            <div>
+              <h3>ID 상관관계 유지</h3>
+              <p>CopilotKit <code>threadId</code>, AG-UI <code>runId</code>, Mothership <code>runId</code>, Mothership <code>turnId</code>, provider session id 매핑을 보관한다.</p>
+            </div>
+            <div>
+              <h3>endpoint 보호</h3>
+              <p>모든 Mothership AG-UI request를 인증하고 <code>threadId -> runId</code> 접근 권한을 server-side에서 검사한다.</p>
+            </div>
+            <div>
+              <h3>browser state 정제</h3>
+              <p>host path, token, environment variable, raw tool payload, billing internal을 UI state에 투영하지 않는다.</p>
+            </div>
+          </div>
+        </section>
+
+        <section id="checklist" class="content-section">
+          <div class="section-heading">
+            <p class="eyebrow">운영 배포 기준</p>
+            <h2>통합 체크리스트</h2>
+            <p>
+              CopilotKit과 Mothership이 안전하게 통합됐다고 말하기 전에 이 항목을
+              확인한다.
+            </p>
+          </div>
+          <ol class="checklist">
+            <li>Mothership이 <code>RunAgentInput</code>을 받는 AG-UI endpoint를 하나 제공한다.</li>
+            <li>Mothership이 기존 native/provider stream을 CopilotKit보다 먼저 소비한다.</li>
+            <li>모든 AG-UI <code>threadId</code>가 stable Mothership <code>runId</code>에 매핑된다.</li>
+            <li>모든 AG-UI <code>runId</code>가 Mothership <code>turnId</code> 또는 correlation id에 매핑된다.</li>
+            <li>permission/question 답변은 Mothership의 pending interaction endpoint로 되돌린다.</li>
+            <li>Mothership bridge frontend tool은 <code>followUp: false</code>로 CopilotKit 자동 재실행을 끊는다.</li>
+            <li>backend/native tool은 CopilotKit frontend tool로 직접 등록하지 않는다.</li>
+            <li>browser-visible state는 sanitized 상태다.</li>
+            <li>runtime-backed deployment는 Mothership을 <code>HttpAgent</code>로 등록한다.</li>
+            <li>self-managed deployment는 Mothership endpoint를 직접 인증한다.</li>
+            <li>production 전에 reconnect/replay 동작을 정의한다.</li>
+            <li>완료 판정은 assistant text가 아니라 Mothership evidence에서 한다.</li>
+          </ol>
+        </section>
+
+        <section id="sources" class="content-section sources">
+          <div class="section-heading">
+            <p class="eyebrow">참고 자료</p>
+            <h2>출처</h2>
+            <p>
+              이 페이지는 공개 가능한 CopilotKit source와 sanitized Mothership 공존 계약만
+              기준으로 작성했다. 내부 Mothership 구현 파일과 비공개 운영 지식은 이 페이지에
+              적지 않는다.
+            </p>
+          </div>
+          <ul>
+            <li><a href="https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site">GitHub Docs: GitHub Pages publishing source 설정</a></li>
+            <li><a href="https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages">GitHub Docs: GitHub Pages custom workflow</a></li>
+            <li><a href="https://docs.copilotkit.ai/backend/ag-ui">CopilotKit Docs: AG-UI agent 연결</a></li>
+            <li><a href="https://docs.copilotkit.ai/backend/self-managed-agents">CopilotKit Docs: self-managed agents</a></li>
+            <li><a href="https://docs.copilotkit.ai/backend/agent-runner">CopilotKit Docs: AgentRunner와 persistence</a></li>
+            <li><a href="https://docs.copilotkit.ai/reference/core/types/FrontendTool">CopilotKit Docs: FrontendTool followUp property</a></li>
+            <li><a href="https://github.com/CopilotKit/CopilotKit/blob/main/packages/core/src/core/run-handler.ts">CopilotKit source: follow-up execution loop</a></li>
+            <li><a href="./external-links.html">외부 링크 부록: 연결된 분석 페이지 목록</a></li>
+            <li><a href="https://github.com/nfbs2000/speaky-CopilotKit/blob/main/dev-docs/architecture/mothership-copilotkit-boundary.md">이 repository의 Markdown 원문</a></li>
+          </ul>
+        </section>
+      </main>
+    </div>
+
+    <script src="./app.js"></script>
+  </body>
+</html>

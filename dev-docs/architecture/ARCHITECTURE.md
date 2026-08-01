@@ -97,6 +97,7 @@ sequenceDiagram
 | [Runtime / Backend](setup-runtime.md)      | Express/Hono endpoints, agents, runners, middleware     |
 | [Multi-Agent Patterns](multi-agent.md)     | Multiple agents, routing, agent-specific tools          |
 | [Pluggable Architecture](plugin-points.md) | Every optional extension point with diagrams            |
+| [Mothership Boundary](mothership-copilotkit-boundary.md) | CopilotKit `followUp: false`와 Mothership 실행 소유권이 겹치지 않게 하는 공존 경계 |
 
 ---
 

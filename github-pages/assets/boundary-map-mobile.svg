@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc" viewBox="0 0 390 620">
+  <title id="title">모바일용 Mothership과 CopilotKit stream 경계</title>
+  <desc id="desc">Mothership이 native stream을 먼저 소비하고 CopilotKit은 AG-UI projection만 소비하는 세로 구성도다.</desc>
+  <defs>
+    <marker id="arrow-blue" markerWidth="10" markerHeight="10" refX="7" refY="5" orient="auto">
+      <path d="M2,2 L8,5 L2,8 Z" fill="#2563eb" />
+    </marker>
+    <marker id="arrow-green" markerWidth="10" markerHeight="10" refX="7" refY="5" orient="auto">
+      <path d="M2,2 L8,5 L2,8 Z" fill="#0f766e" />
+    </marker>
+  </defs>
+  <rect width="390" height="620" rx="18" fill="#f6f7f3" />
+  <rect x="18" y="18" width="354" height="584" rx="14" fill="#ffffff" stroke="#d7ded9" />
+
+  <text x="36" y="54" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="18" font-weight="800" fill="#111827">안전한 공존 구성</text>
+  <text x="36" y="78" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="12" fill="#475569">CopilotKit은 AG-UI projection만 소비한다.</text>
+
+  <g font-family="Inter, ui-sans-serif, system-ui, sans-serif">
+    <rect x="48" y="112" width="294" height="60" rx="9" fill="#eef4ff" stroke="#b8cdf8" />
+    <text x="195" y="138" text-anchor="middle" font-size="15" font-weight="800" fill="#1e3a8a">브라우저</text>
+    <text x="195" y="158" text-anchor="middle" font-size="11" fill="#334155">CopilotKit UI</text>
+
+    <path d="M195 178 V213" stroke="#2563eb" stroke-width="3" marker-end="url(#arrow-blue)" />
+    <text x="214" y="201" font-size="11" fill="#2563eb">runtime route</text>
+
+    <rect x="48" y="220" width="294" height="60" rx="9" fill="#eef4ff" stroke="#b8cdf8" />
+    <text x="195" y="246" text-anchor="middle" font-size="15" font-weight="800" fill="#1e3a8a">HttpAgent</text>
+    <text x="195" y="266" text-anchor="middle" font-size="11" fill="#334155">RunAgentInput -> SSE</text>
+
+    <path d="M195 286 V321" stroke="#2563eb" stroke-width="3" marker-end="url(#arrow-blue)" />
+    <text x="214" y="309" font-size="11" fill="#2563eb">AG-UI request</text>
+
+    <rect x="48" y="328" width="294" height="60" rx="9" fill="#ecfdf5" stroke="#99d7c5" />
+    <text x="195" y="354" text-anchor="middle" font-size="15" font-weight="800" fill="#064e3b">Mothership AG-UI endpoint</text>
+    <text x="195" y="374" text-anchor="middle" font-size="11" fill="#334155">projection gateway</text>
+
+    <path d="M195 394 V429" stroke="#0f766e" stroke-width="3" marker-end="url(#arrow-green)" />
+    <text x="214" y="417" font-size="11" fill="#0f766e">native owner</text>
+
+    <rect x="48" y="436" width="294" height="60" rx="9" fill="#ecfdf5" stroke="#99d7c5" />
+    <text x="195" y="462" text-anchor="middle" font-size="15" font-weight="800" fill="#064e3b">Mothership runtime</text>
+    <text x="195" y="482" text-anchor="middle" font-size="11" fill="#334155">run / turn / permission / evidence</text>
+
+    <path d="M195 502 V537" stroke="#0f766e" stroke-width="3" marker-end="url(#arrow-green)" />
+    <text x="214" y="525" font-size="11" fill="#0f766e">native stream</text>
+
+    <rect x="48" y="544" width="294" height="42" rx="9" fill="#fff7ed" stroke="#f0bf7a" />
+    <text x="195" y="570" text-anchor="middle" font-size="14" font-weight="800" fill="#8a3f0b">Provider native session</text>
+  </g>
+</svg>
