@@ -98,6 +98,7 @@ sequenceDiagram
 | [Multi-Agent Patterns](multi-agent.md)     | Multiple agents, routing, agent-specific tools          |
 | [Pluggable Architecture](plugin-points.md) | Every optional extension point with diagrams            |
 | [Mothership Boundary](mothership-copilotkit-boundary.md) | CopilotKit `followUp: false`와 Mothership 실행 소유권이 겹치지 않게 하는 공존 경계 |
+| [OpenCode-backed Mothership Page](../../github-pages/opencode-coexistence.html) | CopilotKit provider adapter 방식과 OpenCode-backed Mothership 공존 변경안 |
 
 ---
 

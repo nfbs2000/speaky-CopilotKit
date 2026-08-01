@@ -1,0 +1,563 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>OpenCode-backed Mothership 공존안</title>
+    <meta
+      name="description"
+      content="CopilotKit provider adapter 방식과 OpenCode-backed Mothership 구현을 비교하고, 공존 가능한 구조와 Mothership 변경안을 정리한다."
+    />
+    <meta name="theme-color" content="#0f172a" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="./index.html" aria-label="Mothership 경계 문서 홈">
+        <span class="brand-mark" aria-hidden="true">M</span>
+        <span>
+          <strong>OpenCode 공존안</strong>
+          <small>Mothership x CopilotKit</small>
+        </span>
+      </a>
+      <nav class="top-links" aria-label="상단 내비게이션">
+        <a href="./index.html">경계 문서</a>
+        <a href="#provider-pattern">provider 방식</a>
+        <a href="#mothership-now">현재 Mothership</a>
+        <a href="#changes">변경안</a>
+        <a href="./external-links.html">외부 링크</a>
+      </nav>
+    </header>
+
+    <div class="page-shell" id="top">
+      <aside class="side-nav" aria-label="문서 섹션">
+        <a href="#decision" aria-current="true">결론</a>
+        <a href="#provider-pattern">CopilotKit provider</a>
+        <a href="#deepagents">Deep Agents 판정</a>
+        <a href="#mothership-now">Mothership 현재 구조</a>
+        <a href="#fit">맞물리는 지점</a>
+        <a href="#topology">공존 topology</a>
+        <a href="#changes">Mothership 변경안</a>
+        <a href="#opencode-support">OpenCode 지원 시나리오</a>
+        <a href="#sequence">구현 순서</a>
+        <a href="#sources">근거</a>
+      </aside>
+
+      <main>
+        <section class="hero" id="decision">
+          <div class="hero-copy">
+            <p class="eyebrow">source-read decision</p>
+            <h1>
+              <span>OpenCode를</span>
+              <span>CopilotKit에</span>
+              <span>그냥 넘기면</span>
+              <span>위험하다.</span>
+              <span>하지만</span>
+              <span>Mothership이</span>
+              <span>OpenCode adapter가</span>
+              <span>되면 공존 가능하다.</span>
+            </h1>
+            <p class="lede">
+              <span>CopilotKit provider 통합의 공통점은 provider 이름이 아니다.</span>
+              <span>핵심은 provider native stream을 AG-UI event로 바꾸는 adapter 경계다.</span>
+              <span>현재 Mothership은 이미 OpenCode native stream, run/turn, permission/question, evidence를 소유한다.</span>
+              <span>따라서 Mothership을 CopilotKit 뒤로 밀지 말고, Mothership이 OpenCode-backed AG-UI endpoint가 되어야 한다.</span>
+            </p>
+            <div class="contract-strip" role="list" aria-label="결정 요약">
+              <div role="listitem">
+                <strong>공존 가능</strong>
+                <span>Mothership이 native stream의 첫 소비자이고 CopilotKit은 AG-UI projection만 소비할 때.</span>
+              </div>
+              <div role="listitem">
+                <strong>가장 쉬운 길</strong>
+                <span><code>selfManagedAgents -> HttpAgent -> Mothership AG-UI endpoint</code>.</span>
+              </div>
+              <div role="listitem">
+                <strong>위험한 길</strong>
+                <span>CopilotKit Runtime이 OpenCode session을 직접 새로 만들고 Mothership이 옆에서 관찰만 하는 구성.</span>
+              </div>
+              <div role="listitem">
+                <strong>필수 스위치</strong>
+                <span>Mothership bridge frontend tool은 <code>followUp: false</code>.</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="provider-pattern" class="content-section">
+          <div class="section-heading">
+            <p class="eyebrow">CopilotKit provider pattern</p>
+            <h2>다른 provider 코드에서 보이는 공통 패턴</h2>
+            <p>
+              CopilotKit이 여러 provider를 지원하는 방식은 대부분 같다.
+              provider별 SDK/native event를 직접 UI에 노출하지 않고,
+              adapter가 AG-UI event stream으로 바꾼다. CopilotKit UI와 Runtime은 그
+              AG-UI event만 처리한다.
+            </p>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>provider 계열</th>
+                  <th>CopilotKit 쪽 연결</th>
+                  <th>의미</th>
+                  <th>Mothership에 주는 힌트</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>LangGraph Platform</td>
+                  <td><code>LangGraphAgent</code></td>
+                  <td>LangGraph stream을 AG-UI event로 변환한다.</td>
+                  <td>OpenCode도 native stream을 AG-UI로 투영하는 adapter가 필요하다.</td>
+                </tr>
+                <tr>
+                  <td>LangGraph FastAPI</td>
+                  <td><code>LangGraphHttpAgent</code></td>
+                  <td>이미 AG-UI를 말하는 외부 endpoint에 HTTP/SSE로 붙는다.</td>
+                  <td>Mothership도 AG-UI endpoint가 되면 같은 패턴으로 붙는다.</td>
+                </tr>
+                <tr>
+                  <td>ADK, Pydantic AI, Agno, Strands 등</td>
+                  <td><code>HttpAgent</code></td>
+                  <td>provider 서버가 AG-UI endpoint를 제공하고 CopilotKit은 일반 HTTP agent로 소비한다.</td>
+                  <td>가장 현실적인 Mothership 경로는 generic <code>HttpAgent</code>다.</td>
+                </tr>
+                <tr>
+                  <td>CrewAI</td>
+                  <td>전용 AG-UI client 또는 <code>HttpAgent</code></td>
+                  <td>전용 wrapper가 있어도 본질은 외부 agent endpoint를 AG-UI로 읽는 것이다.</td>
+                  <td>OpenCode 전용 wrapper가 생겨도 실행 소유권은 따로 판단해야 한다.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="rule-list">
+            <div class="rule good">
+              <strong>핵심</strong>
+              <p>
+                CopilotKit이 원하는 것은 provider 이름이 아니라 AG-UI contract다.
+                <code>HttpAgent</code>는 request body로 <code>RunAgentInput</code>을 보내고,
+                응답으로 <code>text/event-stream</code> AG-UI SSE를 기대한다.
+              </p>
+            </div>
+            <div class="rule warn">
+              <strong>주의</strong>
+              <p>
+                CopilotKit Runtime을 경유하면 upstream AG-UI SSE를 raw passthrough하지 않는다.
+                Runtime runner가 event를 소비하고 저장/관찰한 뒤 다시 SSE로 발행한다.
+                이것은 지원되는 구조지만 Mothership의 canonical stream은 아니다.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section id="deepagents" class="content-section">
+          <div class="section-heading">
+            <p class="eyebrow">Deep Agents</p>
+            <h2>Deep Agents는 별도 OpenCode 해법이 아니다</h2>
+            <p>
+              Deep Agents 문서를 보면 agent 자체는 <code>createDeepAgent</code>로 만들지만,
+              CopilotKit 연결은 결국 <code>LangGraphAgent</code> 또는
+              <code>LangGraphHttpAgent</code>를 사용한다. 즉 Deep Agents는 별도 전송 계층이
+              아니라 LangGraph/AG-UI 계열 위에 올라간 provider guide다.
+            </p>
+          </div>
+
+          <div class="decision-grid" aria-label="Deep Agents 판단">
+            <div>
+              <strong>도움 되는 점</strong>
+              <span>frontend tool, context, state, interrupt를 agent framework middleware로 넣는 예시를 준다.</span>
+              <span>Mothership bridge tool 설계에 참고할 수 있다.</span>
+            </div>
+            <div>
+              <strong>도움 안 되는 점</strong>
+              <span>OpenCode native session 소유권 문제를 자동으로 해결하지 않는다.</span>
+              <span>Mothership 대신 CopilotKit이 OpenCode를 실행하는 구조가 되면 충돌은 그대로다.</span>
+            </div>
+            <div>
+              <strong>Mothership 적용</strong>
+              <span>Deep Agents를 베끼기보다 provider adapter 패턴을 베낀다.</span>
+              <span>즉 OpenCode native stream을 Mothership 내부에서 AG-UI로 투영한다.</span>
+            </div>
+          </div>
+        </section>
+
+        <section id="mothership-now" class="content-section">
+          <div class="section-heading">
+            <p class="eyebrow">Mothership current shape</p>
+            <h2>현재 Mothership 구현과 비교</h2>
+            <p>
+              현재 Mothership은 이미 OpenCode-backed runtime surface다. 실행을 시작하고,
+              같은 native session에 후속 turn을 보내고, permission/question을 원래 pending
+              interaction으로 되돌리고, raw/native evidence와 사람이 보는 stream projection을
+              분리한다.
+            </p>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>영역</th>
+                  <th>현재 Mothership</th>
+                  <th>CopilotKit provider 방식</th>
+                  <th>판정</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>실행 시작</td>
+                  <td>run/turn을 만들고 OpenCode native session을 시작한다.</td>
+                  <td><code>RunAgentInput</code>을 agent adapter에 보낸다.</td>
+                  <td>Mothership facade가 <code>RunAgentInput</code>을 run/turn 명령으로 변환하면 맞는다.</td>
+                </tr>
+                <tr>
+                  <td>후속 turn</td>
+                  <td>같은 native session에 message를 보낸다.</td>
+                  <td>같은 <code>threadId</code>로 agent를 다시 run한다.</td>
+                  <td><code>threadId -> Mothership runId</code> 매핑이 필요하다.</td>
+                </tr>
+                <tr>
+                  <td>stream</td>
+                  <td>native stream을 먼저 소비하고 저장한 뒤 stream envelope로 투영한다.</td>
+                  <td>AG-UI event stream을 소비한다.</td>
+                  <td>이미 중간 projection 계층이 있으므로 AG-UI projector를 추가하면 된다.</td>
+                </tr>
+                <tr>
+                  <td>permission/question</td>
+                  <td>pending request ID를 보존하고 원래 session에 reply한다.</td>
+                  <td>HITL/custom event/frontend tool로 UI 왕복을 만든다.</td>
+                  <td>UI는 CopilotKit이 렌더해도 reply endpoint는 Mothership이어야 한다.</td>
+                </tr>
+                <tr>
+                  <td>완료 판정</td>
+                  <td>native evidence/readback으로 turn 완료를 판정한다.</td>
+                  <td><code>RUN_FINISHED</code> event를 UI lifecycle로 쓴다.</td>
+                  <td><code>RUN_FINISHED</code>는 Mothership completion 이후에만 emit한다.</td>
+                </tr>
+                <tr>
+                  <td>replay</td>
+                  <td>stream envelope replay와 evidence archive가 있다.</td>
+                  <td><code>connect</code>나 runner store가 UI replay를 담당한다.</td>
+                  <td>Mothership replay가 canonical이고 CopilotKit replay는 projection cache다.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="fit" class="content-section split">
+          <div>
+            <div class="section-heading">
+              <p class="eyebrow">fit analysis</p>
+              <h2>이미 맞는 부분</h2>
+              <p>
+                Mothership은 CopilotKit provider adapter에 필요한 핵심 재료를 이미 갖고 있다.
+                문제는 실행기가 없는 것이 아니라, AG-UI facade가 아직 명시적인 product boundary로
+                분리되어 있지 않다는 점이다.
+              </p>
+            </div>
+            <ol class="checklist">
+              <li>OpenCode native stream의 첫 소비자가 Mothership이다.</li>
+              <li>run과 turn의 stable identity가 있다.</li>
+              <li>후속 turn이 같은 native session에 들어간다.</li>
+              <li>permission/question pending state가 run/turn/session과 묶인다.</li>
+              <li>stream envelope와 replay cursor가 있다.</li>
+              <li>raw evidence와 UI projection이 분리되어 있다.</li>
+            </ol>
+          </div>
+          <div class="rule-list">
+            <div class="rule warn">
+              <strong>아직 빠진 것</strong>
+              <p>
+                CopilotKit이 직접 소비할 수 있는 <code>RunAgentInput -> AG-UI SSE</code>
+                endpoint가 필요하다. 기존 replay만으로는 live SSE가 부족하므로, record writer
+                또는 stream ledger 뒤에 live subscriber를 붙여야 한다.
+              </p>
+            </div>
+            <div class="rule bad">
+              <strong>하면 안 되는 것</strong>
+              <p>
+                CopilotKit frontend tool로 native/backend tool을 그대로 재등록하면 안 된다.
+                그러면 tool 실행 성공 여부와 evidence source가 CopilotKit UI state로 밀린다.
+                native tool은 Mothership/OpenCode 경계 뒤에 두고, CopilotKit tool은 bridge
+                command만 맡긴다.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section id="topology" class="content-section">
+          <div class="section-heading">
+            <p class="eyebrow">coexistence topology</p>
+            <h2>공존 가능한 topology</h2>
+            <p>
+              공존의 기준은 단순하다. OpenCode native session은 하나만 있어야 하고,
+              그 session의 lifecycle과 evidence는 Mothership이 소유해야 한다.
+            </p>
+          </div>
+
+          <div class="topology-tabs" role="tablist" aria-label="공존 topology">
+            <button type="button" role="tab" aria-selected="true" data-topology="direct">
+              직접 연결
+            </button>
+            <button type="button" role="tab" aria-selected="false" data-topology="runtime">
+              Runtime bridge
+            </button>
+            <button type="button" role="tab" aria-selected="false" data-topology="bad">
+              충돌 구성
+            </button>
+          </div>
+
+          <div class="topology-panel" data-panel="direct">
+            <div>
+              <h3>권장 기본안: self-managed Mothership agent</h3>
+              <p>
+                Browser의 CopilotKit UI가 <code>HttpAgent</code>로 Mothership AG-UI endpoint에
+                직접 붙는다. CopilotKit Runtime은 빠지고, Mothership endpoint가 인증, 권한,
+                replay, abort를 직접 책임진다.
+              </p>
+              <pre><code>const mothershipAgent = new HttpAgent({
+  url: "/mothership/agui",
+});
+
+&lt;CopilotKit selfManagedAgents={{ mothership: mothershipAgent }}&gt;
+  &lt;CopilotChat agentId="mothership" /&gt;
+&lt;/CopilotKit&gt;</code></pre>
+            </div>
+            <div>
+              <h3>왜 이게 기본안인가</h3>
+              <p>
+                SSE hop이 하나 줄고, CopilotKit runner replay와 Mothership replay가 덜 겹친다.
+                Mothership이 이미 OpenCode native stream을 소유하므로 이 경로가 가장 단순하다.
+              </p>
+            </div>
+          </div>
+
+          <div class="topology-panel" data-panel="runtime" hidden>
+            <div>
+              <h3>지원 가능안: CopilotKit Runtime bridge</h3>
+              <p>
+                CopilotKit Runtime을 반드시 써야 한다면 Runtime의 agent를
+                <code>HttpAgent -> Mothership AG-UI endpoint</code>로 둔다. 이 구조는
+                CopilotKit이 지원하는 provider 통합 방식과 맞다.
+              </p>
+              <pre><code>Browser
+-> CopilotKit Runtime
+-> HttpAgent
+-> Mothership AG-UI endpoint
+-> OpenCode-backed Mothership runtime</code></pre>
+            </div>
+            <div>
+              <h3>운영 검증 조건</h3>
+              <p>
+                이 경로는 이중 SSE proxy다. upstream과 downstream timeout, buffering, abort,
+                reconnect, replay cursor가 모두 검증되어야 한다. 검증 전 기본안으로 두지 않는다.
+              </p>
+            </div>
+          </div>
+
+          <div class="topology-panel" data-panel="bad" hidden>
+            <div>
+              <h3>충돌 구성: CopilotKit이 OpenCode를 직접 실행</h3>
+              <p>
+                CopilotKit Runtime 뒤에 OpenCode direct adapter를 붙여 새 native session을 만들고,
+                Mothership이 별도 surface로 남으면 공존이 아니다. 실행 원천이 둘이 된다.
+              </p>
+              <pre><code>Browser
+-> CopilotKit Runtime
+-> direct OpenCode adapter
+-> OpenCode native session
+
+Mothership
+-> separate run/session/evidence</code></pre>
+            </div>
+            <div>
+              <h3>깨지는 지점</h3>
+              <p>
+                Mothership이 upstream stream을 먼저 받지 못한다. permission/question reply,
+                tool result, run completion, evidence archive가 CopilotKit 쪽 lifecycle과
+                분리되어 race한다.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section id="changes" class="content-section">
+          <div class="section-heading">
+            <p class="eyebrow">Mothership changes</p>
+            <h2>Mothership을 어떻게 바꾸면 되는가</h2>
+            <p>
+              변경의 방향은 OpenCode 실행기를 새로 만드는 것이 아니다. 현재 Mothership runtime
+              위에 AG-UI facade를 추가하고, CopilotKit에서 들어오는 request를 Mothership 명령과
+              stream replay/live subscribe로 연결한다.
+            </p>
+          </div>
+
+          <div class="decision-grid" aria-label="Mothership 변경안">
+            <div>
+              <strong>1. AG-UI facade endpoint</strong>
+              <span><code>POST /mothership/agui</code> 같은 endpoint를 둔다.</span>
+              <span>입력은 <code>RunAgentInput</code>, 출력은 <code>text/event-stream</code> AG-UI event다.</span>
+              <span>이 endpoint가 Mothership start/send/abort/replay를 호출한다.</span>
+            </div>
+            <div>
+              <strong>2. stable identity mapping</strong>
+              <span><code>threadId</code>는 Mothership <code>runId</code>에 매핑한다.</span>
+              <span>AG-UI <code>runId</code>는 Mothership <code>turnId</code> 또는 correlation id에 매핑한다.</span>
+              <span>browser가 임의 id로 native session을 만들지 못하게 server-side auth를 둔다.</span>
+            </div>
+            <div>
+              <strong>3. stream envelope -> AG-UI projector</strong>
+              <span>Mothership stream envelope를 AG-UI <code>BaseEvent</code>로 변환한다.</span>
+              <span>assistant text는 <code>TEXT_MESSAGE_*</code>, status는 <code>STATE_SNAPSHOT</code> 또는 <code>ACTIVITY</code>로 보낸다.</span>
+              <span><code>RUN_FINISHED</code>는 Mothership completion 이후에만 emit한다.</span>
+            </div>
+            <div>
+              <strong>4. live subscribe 추가</strong>
+              <span>현재 replay cursor만으로는 run 중 SSE가 부족하다.</span>
+              <span>event writer 뒤에 subscriber bus를 붙여 DB append와 동시에 AG-UI stream에도 push한다.</span>
+              <span>새 subscriber는 먼저 replay를 받고 그 다음 live event를 받는다.</span>
+            </div>
+            <div>
+              <strong>5. abort propagation</strong>
+              <span>브라우저 또는 <code>HttpAgent</code> abort signal을 Mothership <code>abort(runId)</code>로 연결한다.</span>
+              <span>중간 Runtime bridge를 쓰면 Runtime request abort도 Mothership abort까지 전달되어야 한다.</span>
+              <span>단순 SSE close와 native abort를 혼동하지 않는다.</span>
+            </div>
+            <div>
+              <strong>6. bridge frontend tools</strong>
+              <span>permission approve, question answer, send turn 같은 bridge command만 CopilotKit tool로 둔다.</span>
+              <span>각 bridge tool은 <code>followUp: false</code>를 사용한다.</span>
+              <span>native/backend tool 자체는 CopilotKit frontend tool로 재등록하지 않는다.</span>
+            </div>
+          </div>
+
+          <div class="rule-list">
+            <div class="rule good">
+              <strong>권장 event mapping</strong>
+              <p>
+                <code>turn.started</code>는 <code>RUN_STARTED</code>,
+                assistant delta/message는 <code>TEXT_MESSAGE_START/CONTENT/END</code>,
+                pending permission/question은 <code>CUSTOM</code> 또는 activity/state로 보낸다.
+                native tool event는 CopilotKit이 실행한 tool처럼 보이면 안 되므로 기본은 activity/custom이다.
+                실제 CopilotKit renderer가 필요한 일부 도구만 통제된 <code>TOOL_CALL_*</code> projection을 허용한다.
+              </p>
+            </div>
+            <div class="rule warn">
+              <strong>가장 중요한 불변식</strong>
+              <p>
+                AG-UI event는 projection이다. Mothership의 raw/native evidence, permission request,
+                tool result, completion 판정은 AG-UI event에서 역생성하지 않는다.
+                AG-UI가 끊겨도 Mothership run은 evidence 기준으로 복구되어야 한다.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section id="opencode-support" class="content-section">
+          <div class="section-heading">
+            <p class="eyebrow">OpenCode support scenario</p>
+            <h2>CopilotKit이 OpenCode를 직접 지원하면 쉬워지는가</h2>
+            <p>
+              쉬워질 수 있다. 단, 그 OpenCode 지원이 어디서 native session을 소유하는지에 따라
+              결론이 달라진다.
+            </p>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>OpenCode 지원 형태</th>
+                  <th>공존성</th>
+                  <th>Mothership 선택</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>CopilotKit용 <code>OpenCodeAgent</code>가 직접 native session을 생성</td>
+                  <td>낮음</td>
+                  <td>Mothership이 실행 원천이어야 한다면 직접 사용하지 않는다.</td>
+                </tr>
+                <tr>
+                  <td><code>OpenCodeAgent</code>가 외부 session factory 또는 stream owner를 주입받음</td>
+                  <td>높음</td>
+                  <td>Mothership session/stream owner를 주입해 adapter만 재사용한다.</td>
+                </tr>
+                <tr>
+                  <td>OpenCode AG-UI server adapter가 별도 endpoint로 제공됨</td>
+                  <td>중간</td>
+                  <td>그 endpoint를 Mothership 안에 넣거나 Mothership 앞단에서 통제한다.</td>
+                </tr>
+                <tr>
+                  <td>Mothership이 자체 AG-UI facade를 구현</td>
+                  <td>높음</td>
+                  <td>현재 구현과 가장 잘 맞는다. official adapter가 생기면 projector 일부만 교체한다.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="rule good">
+            <strong>정리</strong>
+            <p>
+              OpenCode 지원이 생기면 쉬워지는 부분은 event mapping과 transport glue다.
+              하지만 session ownership은 자동으로 해결되지 않는다. Mothership을 유지하려면
+              official OpenCode adapter도 Mothership 아래에서 실행하거나, Mothership의 session/stream
+              owner를 주입받는 형태여야 한다.
+            </p>
+          </div>
+        </section>
+
+        <section id="sequence" class="content-section">
+          <div class="section-heading">
+            <p class="eyebrow">implementation sequence</p>
+            <h2>실행 순서</h2>
+            <p>
+              한 번에 Runtime bridge까지 가지 말고, Mothership-first direct path를 먼저 검증한다.
+              그 다음 필요할 때만 CopilotKit Runtime을 중간에 넣는다.
+            </p>
+          </div>
+
+          <ol class="checklist">
+            <li>P0: Mothership stream envelope를 AG-UI event로 바꾸는 pure projector를 만든다.</li>
+            <li>P1: <code>POST /mothership/agui</code>가 저장된 replay를 SSE로 반환하게 만든다.</li>
+            <li>P2: live subscriber bus를 붙여 run 중 event가 CopilotKit UI에 실시간으로 흐르게 한다.</li>
+            <li>P3: <code>threadId -> runId</code>, <code>runId -> turnId</code> 매핑과 접근 권한을 저장한다.</li>
+            <li>P4: permission/question bridge UI와 frontend tool을 붙이고 모두 <code>followUp: false</code>로 둔다.</li>
+            <li>P5: abort/reconnect/replay gap 테스트를 만든다.</li>
+            <li>P6: self-managed direct path가 안정된 뒤에만 CopilotKit Runtime bridge를 추가 검토한다.</li>
+            <li>P7: official OpenCode adapter가 생기면 Mothership 아래로 넣을 수 있는지 먼저 확인한다.</li>
+          </ol>
+        </section>
+
+        <section id="sources" class="content-section sources">
+          <div class="section-heading">
+            <p class="eyebrow">evidence</p>
+            <h2>근거</h2>
+            <p>
+              이 페이지는 공개 가능한 수준으로 정리했다. 내부 파일 경로, 비공개 tool catalog,
+              raw archive 위치, 세부 class 이름은 싣지 않는다.
+            </p>
+          </div>
+          <ul>
+            <li><a href="https://github.com/CopilotKit/CopilotKit/tree/main/packages/runtime/src/lib/runtime/agent-integrations/langgraph">CopilotKit source: LangGraph integration</a></li>
+            <li><a href="https://github.com/ag-ui-protocol/ag-ui">AG-UI protocol source</a></li>
+            <li><a href="https://docs.copilotkit.ai/backend/ag-ui">CopilotKit Docs: AG-UI agent 연결</a></li>
+            <li><a href="https://docs.copilotkit.ai/backend/self-managed-agents">CopilotKit Docs: self-managed agents</a></li>
+            <li><a href="https://docs.copilotkit.ai/backend/copilot-runtime">CopilotKit Docs: Copilot Runtime</a></li>
+            <li><a href="./index.html">Mothership x CopilotKit 경계 문서</a></li>
+            <li><a href="./external-links.html">외부 링크 부록</a></li>
+          </ul>
+        </section>
+      </main>
+    </div>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
