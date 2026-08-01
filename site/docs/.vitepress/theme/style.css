@@ -10,6 +10,32 @@
   background: var(--vp-c-bg-soft);
 }
 
+.mermaid:not([data-rendered]) {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 220px;
+  font-size: 0;
+}
+
+.mermaid:not([data-rendered]) .mermaid__source {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  overflow: hidden;
+  color: transparent;
+  font-size: 0;
+  white-space: pre;
+  pointer-events: none;
+}
+
+.mermaid:not([data-rendered])::before {
+  content: '다이어그램 로딩 중...';
+  color: var(--vp-c-text-2);
+  font-size: 14px;
+  font-weight: 600;
+}
+
 .mermaid__canvas {
   display: flex;
   justify-content: center;

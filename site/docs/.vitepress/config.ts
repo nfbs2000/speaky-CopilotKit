@@ -106,7 +106,7 @@ export default defineConfig({
         const token = tokens[idx]
         const info = token.info.trim().split(/\s+/)[0]
         if (info === 'mermaid') {
-          return `<pre class="mermaid">${escapeHtml(token.content)}</pre>`
+          return `<div class="mermaid"><pre class="mermaid__source">${escapeHtml(token.content)}</pre></div>`
         }
         return defaultFence?.(tokens, idx, options, env, self) ?? ''
       }
