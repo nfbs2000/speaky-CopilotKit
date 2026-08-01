@@ -4,7 +4,7 @@ const repo = 'https://github.com/nfbs2000/speaky-CopilotKit'
 const analyzedCommit = '5c50d9c51'
 const siteBaseUrl = 'https://nfbs2000.github.io/speaky-CopilotKit/'
 const defaultDescription =
-  'speaky-CopilotKit source를 기준으로 CopilotKit의 runtime, AG-UI, frontend tool, A2UI, Mothership 적용 경계를 설명하는 한국어 기술 문서'
+  'speaky-CopilotKit 리포를 현재 트리 그대로 읽기 위한 한국어 GitHub Pages'
 
 function escapeHtml(value: string): string {
   return value.replace(/[&<>"']/g, (char) => {
@@ -31,7 +31,7 @@ function pageUrl(relativePath: string): string {
 export default defineConfig({
   base: '/speaky-CopilotKit/',
   lang: 'ko-KR',
-  title: 'CopilotKit Source Notes',
+  title: 'CopilotKit Repository Notes',
   description: defaultDescription,
   cleanUrls: true,
   lastUpdated: true,
@@ -49,8 +49,8 @@ export default defineConfig({
     const url = pageUrl(pageData.relativePath)
     const title =
       pageData.relativePath === 'index.md'
-        ? 'CopilotKit Source Notes'
-        : `${pageData.title} | CopilotKit Source Notes`
+        ? 'CopilotKit Repository Notes'
+        : `${pageData.title} | CopilotKit Repository Notes`
     const description = pageData.description || pageData.frontmatter.description || defaultDescription
     const modified =
       typeof pageData.lastUpdated === 'number'
@@ -67,7 +67,7 @@ export default defineConfig({
       inLanguage: 'ko-KR',
       isPartOf: {
         '@type': 'WebSite',
-        name: 'CopilotKit Source Notes',
+        name: 'CopilotKit Repository Notes',
         url: siteBaseUrl,
       },
       author: {
@@ -79,6 +79,9 @@ export default defineConfig({
         'AG-UI',
         'A2UI',
         'frontend tools',
+        'Nx monorepo',
+        'agent skills',
+        'showcase platform',
         'Sim Mothership',
         'agent runtime',
       ],
@@ -111,13 +114,13 @@ export default defineConfig({
     },
   },
   themeConfig: {
-    siteTitle: 'CopilotKit Source',
+    siteTitle: 'CopilotKit Repo',
     outline: {
       level: [2, 3],
       label: '이 페이지',
     },
     nav: [
-      { text: '개요', link: '/' },
+      { text: '리포 개요', link: '/' },
       { text: 'Source Notes', link: '/copilotkit-source/01-introduction' },
       { text: 'GitHub', link: repo },
     ],
@@ -154,7 +157,7 @@ export default defineConfig({
     },
     socialLinks: [{ icon: 'github', link: repo }],
     footer: {
-      message: 'nfbs2000/speaky-CopilotKit source reading notes.',
+      message: 'nfbs2000/speaky-CopilotKit repository notes.',
       copyright: `Source snapshot: ${analyzedCommit}`,
     },
     editLink: {
