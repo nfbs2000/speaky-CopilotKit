@@ -40,7 +40,7 @@ export default defineConfig({
   },
   head: [
     ['meta', { property: 'og:type', content: 'website' }],
-    ['meta', { property: 'og:site_name', content: 'CopilotKit Source Notes' }],
+    ['meta', { property: 'og:site_name', content: 'CopilotKit Repository Notes' }],
     ['meta', { property: 'og:locale', content: 'ko_KR' }],
     ['meta', { name: 'robots', content: 'index,follow' }],
     ['meta', { name: 'twitter:card', content: 'summary' }],
@@ -53,7 +53,7 @@ export default defineConfig({
         : `${pageData.title} | CopilotKit Repository Notes`
     const description = pageData.description || pageData.frontmatter.description || defaultDescription
     const modified =
-      typeof pageData.lastUpdated === 'number'
+      typeof pageData.lastUpdated === 'number' && Number.isFinite(pageData.lastUpdated)
         ? new Date(pageData.lastUpdated).toISOString()
         : undefined
 
@@ -61,7 +61,7 @@ export default defineConfig({
       '@context': 'https://schema.org',
       '@type': pageData.relativePath === 'index.md' ? 'WebSite' : 'TechArticle',
       name: title,
-      headline: pageData.title || 'CopilotKit Source Notes',
+      headline: pageData.title || 'CopilotKit Repository Notes',
       description,
       url,
       inLanguage: 'ko-KR',
@@ -82,7 +82,6 @@ export default defineConfig({
         'Nx monorepo',
         'agent skills',
         'showcase platform',
-        'Sim Mothership',
         'agent runtime',
       ],
       mainEntityOfPage: url,
@@ -121,10 +120,31 @@ export default defineConfig({
     },
     nav: [
       { text: '리포 개요', link: '/' },
+      { text: 'Repository Guide', link: '/repository-guide/01-repo-map' },
       { text: 'Source Notes', link: '/copilotkit-source/01-introduction' },
       { text: 'GitHub', link: repo },
     ],
     sidebar: {
+      '/repository-guide/': [
+        {
+          text: 'CopilotKit Repository Guide',
+          items: [
+            { text: '1. 리포 지도', link: '/repository-guide/01-repo-map' },
+            { text: '2. 패키지 레이어', link: '/repository-guide/02-package-layers' },
+            { text: '3. Runtime과 AG-UI', link: '/repository-guide/03-runtime-agui' },
+            {
+              text: '4. Frontend와 Rendering',
+              link: '/repository-guide/04-frontend-rendering',
+            },
+            { text: '5. Bot Surfaces', link: '/repository-guide/05-bot-surfaces' },
+            {
+              text: '6. Examples와 Showcase',
+              link: '/repository-guide/06-examples-showcase',
+            },
+            { text: '7. Skills와 개발 운영', link: '/repository-guide/07-skills-workflow' },
+          ],
+        },
+      ],
       '/copilotkit-source/': [
         {
           text: 'CopilotKit Source Notes',

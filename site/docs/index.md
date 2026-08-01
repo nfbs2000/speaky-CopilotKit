@@ -5,7 +5,7 @@ description: speaky-CopilotKit 리포를 현재 트리 그대로 읽기 위한 �
 
 # CopilotKit Repository Notes
 
-이 페이지는 `/Users/realpio/Documents/speaky-CopilotKit` 리포를 현재 보이는 구조 그대로 설명하기 위한 GitHub Pages입니다. 특정 책의 해석이나 다른 프로젝트 적용 설계를 먼저 앞세우지 않고, 루트 README, `package.json`, `pnpm-workspace.yaml`, `nx.json`, `AGENTS.md`, `CLAUDE.md`, `dev-docs/`, `examples/`, `showcase/`, `skills/`에서 확인되는 역할을 기준으로 정리합니다.
+이 페이지는 [`nfbs2000/speaky-CopilotKit`](https://github.com/nfbs2000/speaky-CopilotKit) GitHub repository를 현재 공개 트리 그대로 설명하기 위한 GitHub Pages입니다. 특정 책의 해석이나 다른 프로젝트 적용 설계를 먼저 앞세우지 않고, GitHub의 README, package metadata, workspace 설정, 개발 문서, examples, showcase, skills를 기준으로 정리합니다.
 
 ## 짧은 답
 
@@ -23,6 +23,18 @@ flowchart LR
   Repo["examples, showcase, skills, scripts"] --> Core
   Repo --> Runtime
 ```
+
+## 읽는 순서
+
+| 묶음 | 먼저 볼 페이지 | 질문 |
+| --- | --- | --- |
+| 리포 전체 지도 | [1. 리포 지도](./repository-guide/01-repo-map.md) | 이 저장소는 어떤 단위로 나뉘는가 |
+| 패키지 구조 | [2. 패키지 레이어](./repository-guide/02-package-layers.md) | `@copilotkit/*` 패키지는 어떤 계층으로 읽어야 하는가 |
+| 서버/프로토콜 | [3. Runtime과 AG-UI](./repository-guide/03-runtime-agui.md) | frontend, runtime, agent framework는 어떤 event stream으로 연결되는가 |
+| 프론트엔드 표면 | [4. Frontend와 Rendering](./repository-guide/04-frontend-rendering.md) | React/Angular/Vue/Native, A2UI, tool rendering은 어디에 놓이는가 |
+| 채팅 플랫폼 | [5. Bot Surfaces](./repository-guide/05-bot-surfaces.md) | Slack, Teams, Discord, Telegram, WhatsApp adapter는 어떤 경계인가 |
+| 실전 예제와 운영 | [6. Examples와 Showcase](./repository-guide/06-examples-showcase.md) | 48개 예제와 showcase platform은 무엇을 검증하는가 |
+| AI coding agent 운영 | [7. Skills와 개발 운영](./repository-guide/07-skills-workflow.md) | `skills/`, `.claude/`, workflow 문서는 무엇을 담당하는가 |
 
 ## 리포 큰 덩어리
 
