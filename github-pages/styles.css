@@ -292,6 +292,11 @@ h3 {
   font-size: 20px;
 }
 
+.callout h3 {
+  margin-bottom: 8px;
+  font-size: 18px;
+}
+
 .callout p {
   margin-bottom: 0;
   font-size: clamp(19px, 2.6vw, 30px);
@@ -303,6 +308,17 @@ h3 {
 
 .callout p span {
   display: block;
+}
+
+.callout.inline {
+  padding: 18px 20px;
+}
+
+.callout.inline p {
+  color: var(--muted);
+  font-size: 15px;
+  font-weight: 620;
+  line-height: 1.6;
 }
 
 .critical {

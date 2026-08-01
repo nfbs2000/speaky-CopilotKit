@@ -89,13 +89,15 @@ native/provider stream이 만든다.
 
 ### 1. Mothership-first AG-UI endpoint
 
-권장 구성이다.
+핵심 원칙이다. 단, 아래 흐름의 `CopilotKit Runtime`과 `HttpAgent` 직접 연결은
+의도적으로 선택해야 한다. 두 방식은 같은 의미가 아니다.
 
 ```text
 Browser
 -> CopilotKit UI
--> CopilotKit Runtime 또는 HttpAgent
--> Mothership AG-UI endpoint
+-> CopilotKit Runtime -> HttpAgent -> Mothership AG-UI endpoint
+   또는
+-> selfManagedAgents/HttpAgent -> Mothership AG-UI endpoint
 -> 기존 Mothership runtime
 -> native/provider stream
 -> Mothership ledger/evidence
@@ -111,10 +113,18 @@ Browser
 - CopilotKit frontend tool은 Mothership bridge command만 담당한다.
 - bridge command에는 `followUp: false`를 두어 CopilotKit 자동 follow-up을 끊는다.
 
+CopilotKit의 일반적인 runtime-backed integration에서는
+`CopilotRuntime -> HttpAgent -> AG-UI endpoint`가 지원되는 구조다. Runtime이
+server-side routing, middleware, auth boundary를 제공하기 때문이다. 하지만
+Mothership-first 관점에서는 이것이 유일한 권장안이 아니다. Runtime이 필요 없거나
+이중 라우트가 부담이면 `selfManagedAgents`로 `HttpAgent`를 브라우저에 직접 등록하는
+구성이 Mothership projection에는 더 단순하다.
+
 ### 2. Self-managed Mothership agent
 
-CopilotKit Runtime이 중간에서 runner/store/middleware를 갖는 것도 부담이면 browser가
-`HttpAgent`로 Mothership AG-UI endpoint에 직접 붙는다.
+CopilotKit Runtime이 중간에서 runner/store/middleware를 갖는 것도 부담이면
+`selfManagedAgents`에 `HttpAgent`를 등록해 browser가 Mothership AG-UI endpoint에
+직접 붙는다.
 
 ```text
 Browser -> HttpAgent -> Mothership AG-UI endpoint -> Mothership runtime

@@ -260,14 +260,20 @@
 
           <div class="topology-panel" data-panel="runtime">
             <div>
-              <h3>CopilotKit Runtime을 거치는 Mothership bridge</h3>
+              <h3>옵션 A: CopilotKit Runtime을 거치는 Mothership bridge</h3>
               <p>
                 Browser -> CopilotKit Runtime -> <code>HttpAgent</code> ->
                 Mothership AG-UI endpoint -> existing Mothership native session.
               </p>
               <p>
-                CopilotKit runtime routing, middleware, 표준 component를 쓰면서도
-                native 실행 소유권을 Mothership에 남기고 싶을 때 이 구성을 쓴다.
+                이중 라우트가 맞다. CopilotKit 공식 문서의 runtime-backed AG-UI
+                연결 방식과 같은 계열이며, runtime routing, server-side middleware,
+                auth 경계를 CopilotKit 쪽에 두고 싶을 때 쓴다.
+              </p>
+              <p>
+                단, 이 구성이 Mothership-first의 유일한 권장안은 아니다. Runtime은
+                AG-UI projection을 프록시할 뿐이고, Mothership native stream과
+                evidence의 source of truth가 되면 안 된다.
               </p>
             </div>
             <pre><code>const runtime = new CopilotRuntime({
@@ -282,22 +288,35 @@
 
           <div class="topology-panel" data-panel="self" hidden>
             <div>
-              <h3>직접 연결 Mothership agent</h3>
+              <h3>옵션 B: 직접 연결 Mothership agent</h3>
               <p>
                 Browser -> <code>HttpAgent</code> -> Mothership AG-UI endpoint.
-                이 agent는 CopilotKit Runtime을 우회한다.
+                이 agent는 CopilotKit Runtime을 우회한다. Mothership 실행 소유권을
+                가장 단순하게 보존하는 projection-only 구성이다.
               </p>
               <p>
-                runtime interception 자체가 문제라면 이 구성을 쓴다. 대신 인증,
-                권한, CORS, rate limit, replay는 Mothership endpoint가 직접 책임진다.
+                production에서는 CopilotKit의 supported direct path인
+                <code>selfManagedAgents</code>로 연결한다. 대신 인증, 권한, CORS,
+                rate limit, replay는 Mothership endpoint가 직접 책임진다.
               </p>
             </div>
             <pre><code>&lt;CopilotKit
-  runtimeUrl="/api/copilotkit"
   selfManagedAgents={{ mothership: mothershipAgent }}
 &gt;
   &lt;CopilotChat agentId="mothership" /&gt;
 &lt;/CopilotKit&gt;</code></pre>
+          </div>
+
+          <div class="callout inline">
+            <h3>정리</h3>
+            <p>
+              CopilotKit 관점의 일반 권장 경로는 runtime-backed path다. 그래서
+              <code>CopilotRuntime -> HttpAgent -> AG-UI endpoint</code>는 지원되는
+              구성이다. 하지만 Mothership 기준의 최우선 원칙은 "기존 Mothership이
+              먼저 소비하고 먼저 기록한다"이다. runtime 기능이 필요 없거나 이중
+              라우트가 운영상 부담이면 <code>selfManagedAgents</code> 직접 연결을
+              Mothership projection의 기본안으로 둔다.
+            </p>
           </div>
 
           <div class="topology-panel" data-panel="tee" hidden>
@@ -599,8 +618,8 @@ const runtime = new CopilotRuntime({
             <li>Mothership bridge frontend tool은 <code>followUp: false</code>로 CopilotKit 자동 재실행을 끊는다.</li>
             <li>backend/native tool은 CopilotKit frontend tool로 직접 등록하지 않는다.</li>
             <li>browser-visible state는 sanitized 상태다.</li>
-            <li>runtime-backed deployment는 Mothership을 <code>HttpAgent</code>로 등록한다.</li>
-            <li>self-managed deployment는 Mothership endpoint를 직접 인증한다.</li>
+            <li>runtime-backed deployment를 선택했다면 Mothership을 <code>HttpAgent</code>로 등록한다.</li>
+            <li>self-managed deployment를 선택했다면 Mothership endpoint를 직접 인증한다.</li>
             <li>production 전에 reconnect/replay 동작을 정의한다.</li>
             <li>완료 판정은 assistant text가 아니라 Mothership evidence에서 한다.</li>
           </ol>

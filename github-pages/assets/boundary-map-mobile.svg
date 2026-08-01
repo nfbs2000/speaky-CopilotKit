@@ -12,8 +12,8 @@
   <rect width="390" height="620" rx="18" fill="#f6f7f3" />
   <rect x="18" y="18" width="354" height="584" rx="14" fill="#ffffff" stroke="#d7ded9" />
 
-  <text x="36" y="54" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="18" font-weight="800" fill="#111827">안전한 공존 구성</text>
-  <text x="36" y="78" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="12" fill="#475569">CopilotKit은 AG-UI projection만 소비한다.</text>
+  <text x="36" y="54" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="18" font-weight="800" fill="#111827">옵션 A: Runtime bridge</text>
+  <text x="36" y="78" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="12" fill="#475569">지원 구성. 단일 권장안은 아니다.</text>
 
   <g font-family="Inter, ui-sans-serif, system-ui, sans-serif">
     <rect x="48" y="112" width="294" height="60" rx="9" fill="#eef4ff" stroke="#b8cdf8" />
