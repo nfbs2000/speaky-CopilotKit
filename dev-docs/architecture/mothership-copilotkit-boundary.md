@@ -120,6 +120,27 @@ Mothership-first 관점에서는 이것이 유일한 권장안이 아니다. Run
 이중 라우트가 부담이면 `selfManagedAgents`로 `HttpAgent`를 브라우저에 직접 등록하는
 구성이 Mothership projection에는 더 단순하다.
 
+SSE 관점에서 runtime bridge는 raw passthrough가 아니다.
+
+```text
+Mothership AG-UI SSE
+-> CopilotKit Runtime의 HttpAgent가 event로 소비
+-> AgentRunner가 event를 관찰/저장/compaction/finalize
+-> Runtime이 EventEncoder로 새 SSE를 브라우저에 재발행
+```
+
+따라서 runtime bridge가 살아남으려면 다음을 검증해야 한다.
+
+- upstream Mothership SSE가 long-running 연결을 안정적으로 유지한다.
+- CopilotKit Runtime 배포 환경이 downstream SSE를 buffering 없이 flush한다.
+- browser abort가 CopilotKit Runtime을 거쳐 Mothership run abort까지 전달된다.
+- reconnect/connect 시 CopilotKit runner replay와 Mothership replay가 충돌하지 않는다.
+- `followUp: false`로 bridge command 이후 CopilotKit 자동 continuation이 끊긴다.
+
+위 조건을 통과하지 못하면 공존은 "불가능"으로 판단해야 한다. 그때는
+`selfManagedAgents` 직접 연결, CopilotKit renderer-only 사용, 또는 CopilotKit 통합
+제외 중 하나를 선택한다.
+
 ### 2. Self-managed Mothership agent
 
 CopilotKit Runtime이 중간에서 runner/store/middleware를 갖는 것도 부담이면

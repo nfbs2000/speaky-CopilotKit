@@ -319,6 +319,33 @@
             </p>
           </div>
 
+          <div class="decision-grid" aria-label="SSE 이중 라우트 판정">
+            <div>
+              <strong>CopilotKit 권장</strong>
+              <span>공식 기본 경로는 runtime-backed 구성이다.</span>
+              <span>Runtime은 인증, middleware, routing, Enterprise 기능의 경계다.</span>
+              <span><code>HttpAgent</code>로 외부 AG-UI endpoint를 등록하는 패턴은 지원된다.</span>
+            </div>
+            <div>
+              <strong>SSE 이중 프록시 현실</strong>
+              <span>Runtime은 upstream SSE를 raw passthrough하지 않는다.</span>
+              <span><code>HttpAgent</code>가 AG-UI event를 소비하고 Runtime이 다시 SSE로 인코딩한다.</span>
+              <span>따라서 두 hop 모두 timeout, abort, reconnect, buffering 검증이 필요하다.</span>
+            </div>
+            <div>
+              <strong>Mothership 기본안</strong>
+              <span>기존 실행 소유권이 중요하면 <code>selfManagedAgents</code> 직접 연결을 먼저 본다.</span>
+              <span>이 경우 CopilotKit Runtime은 빠지고 Mothership endpoint가 보안과 replay를 맡는다.</span>
+              <span>projection-only UI가 목표라면 이 경로가 더 단순하다.</span>
+            </div>
+            <div>
+              <strong>공존 불가 조건</strong>
+              <span>CopilotKit Runtime과 Mothership이 같은 continuation/persistence를 동시에 소유하려 하면 깨진다.</span>
+              <span>raw native event가 반드시 브라우저까지 보존돼야 하면 AG-UI projection은 부족하다.</span>
+              <span>이 경우 CopilotKit은 renderer만 쓰거나 통합하지 않는 선택도 가능하다.</span>
+            </div>
+          </div>
+
           <div class="topology-panel" data-panel="tee" hidden>
             <div>
               <h3>런타임 custom runner tee</h3>
@@ -638,6 +665,8 @@ const runtime = new CopilotRuntime({
           <ul>
             <li><a href="https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site">GitHub Docs: GitHub Pages publishing source 설정</a></li>
             <li><a href="https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages">GitHub Docs: GitHub Pages custom workflow</a></li>
+            <li><a href="https://docs.copilotkit.ai/backend/copilot-runtime">CopilotKit Docs: Copilot Runtime</a></li>
+            <li><a href="https://docs.copilotkit.ai/backend/runtime-endpoints">CopilotKit Docs: Runtime HTTP endpoints</a></li>
             <li><a href="https://docs.copilotkit.ai/backend/ag-ui">CopilotKit Docs: AG-UI agent 연결</a></li>
             <li><a href="https://docs.copilotkit.ai/backend/self-managed-agents">CopilotKit Docs: self-managed agents</a></li>
             <li><a href="https://docs.copilotkit.ai/backend/agent-runner">CopilotKit Docs: AgentRunner와 persistence</a></li>
