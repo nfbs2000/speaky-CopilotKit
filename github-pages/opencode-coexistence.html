@@ -38,6 +38,7 @@
         <a href="#fit">맞물리는 지점</a>
         <a href="#topology">공존 topology</a>
         <a href="#changes">Mothership 변경안</a>
+        <a href="#loss">유실 판정</a>
         <a href="#opencode-support">OpenCode 지원 시나리오</a>
         <a href="#sequence">구현 순서</a>
         <a href="#sources">근거</a>
@@ -459,6 +460,122 @@ Mothership
           </div>
         </section>
 
+        <section id="loss" class="content-section">
+          <div class="section-heading">
+            <p class="eyebrow">projection loss model</p>
+            <h2>SSE projection의 유실 여부를 어떻게 판정할 것인가</h2>
+            <p>
+              여기서 “유실 없음”이라고 부르면 안 된다. SSE socket은 끊길 수 있고,
+              브라우저가 실제로 이벤트를 적용했는지 서버가 알 수 없다. 보장해야 할 것은
+              Mothership의 canonical ledger가 <strong>연속 seq로 저장되고</strong>,
+              AG-UI projection이 그 seq를 기준으로 <strong>유실을 판정하고 재생할 수 있는가</strong>다.
+            </p>
+          </div>
+
+          <div class="rule-list">
+            <div class="rule good">
+              <strong>canonical 기준</strong>
+              <p>
+                기준은 CopilotKit SSE가 아니라 Mothership stream envelope다.
+                native event를 받은 뒤 raw event와 stream event/envelope를 먼저 저장하고,
+                그 다음 live subscriber에 push한다. 저장되지 않은 이벤트를 AG-UI로 먼저 보내면
+                UI에는 보였는데 evidence에는 없는 상태가 되므로 실패다.
+              </p>
+            </div>
+            <div class="rule warn">
+              <strong>서버가 증명할 수 없는 것</strong>
+              <p>
+                서버는 “socket에 썼다”까지만 알 수 있다. 브라우저 reducer가 그 AG-UI event를
+                실제로 적용했는지는 알 수 없다. 따라서 browser까지 exactly-once를 주장하려면
+                client watermark 또는 ack가 별도로 필요하다. ack가 없다면 표현은
+                <code>lossless</code>가 아니라 <code>replayable</code>, <code>loss-detectable</code>이다.
+              </p>
+            </div>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>유실 종류</th>
+                  <th>감지 기준</th>
+                  <th>처리</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>native ingest 유실</td>
+                  <td>OpenCode SSE가 terminal event 없이 끊김, activation watchdog timeout, pending permission/question 불일치</td>
+                  <td>Mothership turn을 complete로 닫지 않는다. <code>turn.interrupted</code> 또는 error로 남기고 AG-UI에는 <code>RUN_ERROR</code> 또는 state error를 보낸다.</td>
+                </tr>
+                <tr>
+                  <td>ledger seq gap</td>
+                  <td>Mothership replay response의 <code>status: gap</code>, <code>missingSeqs</code>, <code>expired</code>, <code>invalid</code></td>
+                  <td>정상 text delta처럼 이어 보내지 않는다. gap 상태를 UI에 명시하고 full readback 또는 새 snapshot으로 복구한다.</td>
+                </tr>
+                <tr>
+                  <td>projection gap</td>
+                  <td>stream event는 있는데 envelope가 없거나, envelope seq가 끊기거나, projection fingerprint가 맞지 않음</td>
+                  <td>projector audit 실패로 처리한다. AG-UI stream을 계속 붙이지 말고 Mothership readback으로 원장을 확인한다.</td>
+                </tr>
+                <tr>
+                  <td>SSE delivery gap</td>
+                  <td>client가 마지막으로 본 Mothership seq 또는 projection watermark보다 서버의 last seq가 큼</td>
+                  <td>재접속 시 <code>afterSeq</code>부터 replay한다. 중복 가능성을 전제로 stable id와 idempotent reducer를 쓴다.</td>
+                </tr>
+                <tr>
+                  <td>Runtime bridge gap</td>
+                  <td>Mothership upstream seq와 CopilotKit Runtime downstream event store가 서로 다른 cursor를 가짐</td>
+                  <td>Runtime bridge 전에는 direct path에서 먼저 검증한다. bridge를 넣으면 두 ledger의 cursor 대조 테스트를 추가한다.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="decision-grid" aria-label="projection 유실 방지 규칙">
+            <div>
+              <strong>1. projector는 pure function</strong>
+              <span><code>project(envelope) -> AG-UI events[]</code>는 deterministic이어야 한다.</span>
+              <span>같은 envelope seq와 fingerprint는 항상 같은 message/tool/state id를 만든다.</span>
+            </div>
+            <div>
+              <strong>2. seq를 AG-UI와 분리 보존</strong>
+              <span>표준 <code>TEXT_MESSAGE_*</code> event에 임의 필드를 기대하지 않는다.</span>
+              <span>server-side delivery ledger에 <code>mothershipSeq -> aguiEventIds</code>를 저장한다.</span>
+            </div>
+            <div>
+              <strong>3. live push는 DB append 이후</strong>
+              <span>raw/native event, stream event, envelope가 저장된 뒤 subscriber bus에 push한다.</span>
+              <span>DB append 실패 이벤트는 UI에 먼저 보내지 않는다.</span>
+            </div>
+            <div>
+              <strong>4. replay와 live의 race를 닫기</strong>
+              <span>replay를 먼저 읽고 나중에 subscribe하면 그 사이 event가 빠질 수 있다.</span>
+              <span>subscriber를 먼저 등록해 live를 buffer하고, DB replay를 보낸 뒤 buffered live 중 replay last seq보다 큰 것만 flush한다.</span>
+            </div>
+            <div>
+              <strong>5. reconnect cursor</strong>
+              <span><code>POST /mothership/agui</code>는 <code>afterSeq</code> 또는 equivalent watermark를 받는다.</span>
+              <span>CopilotKit <code>HttpAgent</code>가 native EventSource가 아니므로 browser <code>Last-Event-ID</code>에 의존하지 않는다.</span>
+            </div>
+            <div>
+              <strong>6. delta 중복 방지</strong>
+              <span>재전송은 at-least-once로 본다.</span>
+              <span>assistant message id, toolCallId, state key를 안정적으로 만들어 replay 중복이 같은 항목을 갱신하도록 한다.</span>
+            </div>
+          </div>
+
+          <div class="rule bad">
+            <strong>금지할 구현</strong>
+            <p>
+              native SSE chunk를 받자마자 AG-UI delta로 쓰고 나중에 DB에 저장하는 방식,
+              replay query 후 live subscribe를 붙이는 방식, cursor gap을 무시하고 다음 delta를
+              이어 쓰는 방식은 모두 유실을 숨긴다. 이런 구현은 “빠른 streaming”처럼 보여도
+              Mothership-first 공존 조건을 깨뜨린다.
+            </p>
+          </div>
+        </section>
+
         <section id="opencode-support" class="content-section">
           <div class="section-heading">
             <p class="eyebrow">OpenCode support scenario</p>
@@ -525,12 +642,12 @@ Mothership
           </div>
 
           <ol class="checklist">
-            <li>P0: Mothership stream envelope를 AG-UI event로 바꾸는 pure projector를 만든다.</li>
-            <li>P1: <code>POST /mothership/agui</code>가 저장된 replay를 SSE로 반환하게 만든다.</li>
-            <li>P2: live subscriber bus를 붙여 run 중 event가 CopilotKit UI에 실시간으로 흐르게 한다.</li>
+            <li>P0: Mothership stream envelope를 AG-UI event로 바꾸는 pure projector를 만든다. 이때 <code>seq/fingerprint -> aguiEventIds</code> projection audit도 같이 남긴다.</li>
+            <li>P1: <code>POST /mothership/agui</code>가 저장된 replay를 SSE로 반환하게 만든다. <code>gap/expired/invalid</code> cursor는 정상 delta가 아니라 복구 상태로 보낸다.</li>
+            <li>P2: live subscriber bus를 붙여 run 중 event가 CopilotKit UI에 실시간으로 흐르게 한다. subscriber 등록, replay, buffered live flush 순서로 race를 닫는다.</li>
             <li>P3: <code>threadId -> runId</code>, <code>runId -> turnId</code> 매핑과 접근 권한을 저장한다.</li>
             <li>P4: permission/question bridge UI와 frontend tool을 붙이고 모두 <code>followUp: false</code>로 둔다.</li>
-            <li>P5: abort/reconnect/replay gap 테스트를 만든다.</li>
+            <li>P5: abort/reconnect/replay gap 테스트를 만든다. 테스트에는 중복 replay, seq gap, expired cursor, live/replay 경계 event, mid-stream disconnect가 포함되어야 한다.</li>
             <li>P6: self-managed direct path가 안정된 뒤에만 CopilotKit Runtime bridge를 추가 검토한다.</li>
             <li>P7: official OpenCode adapter가 생기면 Mothership 아래로 넣을 수 있는지 먼저 확인한다.</li>
           </ol>
