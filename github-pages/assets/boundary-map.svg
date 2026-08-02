@@ -1,74 +1,68 @@
 <svg xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc" viewBox="0 0 1280 720">
-  <title id="title">Mothership과 CopilotKit의 안전한 stream 경계</title>
-  <desc id="desc">Mothership이 native/provider stream을 소유하고 CopilotKit은 AG-UI projection만 소비하는 구성을 보여준다.</desc>
+  <title id="title">Mothership AG-UI projection adapter 경계</title>
+  <desc id="desc">Mothership이 OpenCode native stream을 저장하고 projection adapter가 CopilotKit에 AG-UI event를 제공하는 기본 구성을 보여준다.</desc>
   <defs>
-    <marker id="arrow-blue" markerWidth="12" markerHeight="12" refX="8" refY="6" orient="auto">
+    <marker id="arrow-blue" markerWidth="12" markerHeight="12" refX="9" refY="6" orient="auto">
       <path d="M2,2 L10,6 L2,10 Z" fill="#2563eb" />
     </marker>
-    <marker id="arrow-green" markerWidth="12" markerHeight="12" refX="8" refY="6" orient="auto">
+    <marker id="arrow-green" markerWidth="12" markerHeight="12" refX="9" refY="6" orient="auto">
       <path d="M2,2 L10,6 L2,10 Z" fill="#0f766e" />
     </marker>
-    <filter id="shadow" x="-10%" y="-20%" width="120%" height="150%">
-      <feDropShadow dx="0" dy="12" stdDeviation="14" flood-color="#0f172a" flood-opacity="0.12" />
-    </filter>
+    <marker id="arrow-amber" markerWidth="12" markerHeight="12" refX="9" refY="6" orient="auto">
+      <path d="M2,2 L10,6 L2,10 Z" fill="#b45309" />
+    </marker>
   </defs>
   <rect width="1280" height="720" rx="22" fill="#f6f7f3" />
-  <rect x="56" y="52" width="1168" height="616" rx="18" fill="#ffffff" stroke="#d7ded9" />
+  <rect x="54" y="48" width="1172" height="624" rx="18" fill="#ffffff" stroke="#d7ded9" />
 
-  <text x="92" y="104" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="24" font-weight="700" fill="#111827">옵션 A: Runtime bridge 구성</text>
-  <text x="92" y="134" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="15" fill="#475569">지원 구성이다. 단, SSE raw passthrough가 아니므로 운영 검증 전 기본안으로 두지 않는다.</text>
+  <g font-family="Inter, ui-sans-serif, system-ui, sans-serif">
+    <text x="90" y="100" font-size="24" font-weight="800" fill="#111827">기본안: Mothership committed event를 AG-UI로 투영한다</text>
+    <text x="90" y="132" font-size="15" fill="#475569">CopilotKit Runtime은 필수 선행 조건이 아니다. 먼저 같은 adapter 계약을 direct path에서 검증한다.</text>
 
-  <g filter="url(#shadow)">
-    <rect x="92" y="190" width="176" height="92" rx="10" fill="#eef4ff" stroke="#b8cdf8" />
-    <text x="180" y="227" text-anchor="middle" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="17" font-weight="700" fill="#1e3a8a">브라우저</text>
-    <text x="180" y="253" text-anchor="middle" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="13" fill="#334155">CopilotKit UI</text>
+    <g>
+      <rect x="92" y="190" width="226" height="98" rx="10" fill="#eef4ff" stroke="#b8cdf8" />
+      <rect x="386" y="190" width="226" height="98" rx="10" fill="#eef4ff" stroke="#b8cdf8" />
+      <rect x="680" y="190" width="226" height="98" rx="10" fill="#ecfdf5" stroke="#99d7c5" />
+      <rect x="974" y="190" width="214" height="98" rx="10" fill="#ecfdf5" stroke="#99d7c5" />
+    </g>
 
-    <rect x="340" y="190" width="186" height="92" rx="10" fill="#eef4ff" stroke="#b8cdf8" />
-    <text x="433" y="227" text-anchor="middle" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="17" font-weight="700" fill="#1e3a8a">런타임</text>
-    <text x="433" y="253" text-anchor="middle" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="13" fill="#334155">라우팅 / 미들웨어</text>
+    <text x="205" y="229" text-anchor="middle" font-size="17" font-weight="800" fill="#1e3a8a">CopilotKit UI</text>
+    <text x="205" y="255" text-anchor="middle" font-size="13" fill="#334155">chat / useInterrupt</text>
+    <text x="499" y="229" text-anchor="middle" font-size="17" font-weight="800" fill="#1e3a8a">AG-UI Adapter</text>
+    <text x="499" y="255" text-anchor="middle" font-size="13" fill="#334155">projector / resume dispatch</text>
+    <text x="793" y="229" text-anchor="middle" font-size="17" font-weight="800" fill="#064e3b">Mothership runtime</text>
+    <text x="793" y="255" text-anchor="middle" font-size="13" fill="#334155">run / turn / ledger / permission</text>
+    <text x="1081" y="229" text-anchor="middle" font-size="17" font-weight="800" fill="#064e3b">OpenCode</text>
+    <text x="1081" y="255" text-anchor="middle" font-size="13" fill="#334155">native session / global SSE</text>
 
-    <rect x="598" y="190" width="182" height="92" rx="10" fill="#eef4ff" stroke="#b8cdf8" />
-    <text x="689" y="227" text-anchor="middle" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="17" font-weight="700" fill="#1e3a8a">HttpAgent</text>
-    <text x="689" y="253" text-anchor="middle" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="13" fill="#334155">AG-UI client</text>
+    <path d="M318 220 H378" stroke="#2563eb" stroke-width="3" marker-end="url(#arrow-blue)" />
+    <text x="348" y="204" text-anchor="middle" font-size="12" fill="#2563eb">RunAgentInput / resume[]</text>
+    <path d="M386 266 H326" stroke="#2563eb" stroke-width="3" marker-end="url(#arrow-blue)" />
+    <text x="356" y="284" text-anchor="middle" font-size="12" fill="#2563eb">AG-UI SSE / interrupt</text>
 
-    <rect x="858" y="190" width="236" height="92" rx="10" fill="#ecfdf5" stroke="#99d7c5" />
-    <text x="976" y="227" text-anchor="middle" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="17" font-weight="700" fill="#064e3b">Mothership</text>
-    <text x="976" y="253" text-anchor="middle" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="13" fill="#334155">AG-UI endpoint</text>
+    <path d="M612 220 H672" stroke="#0f766e" stroke-width="3" marker-end="url(#arrow-green)" />
+    <text x="642" y="204" text-anchor="middle" font-size="12" fill="#0f766e">start / send / reply</text>
+    <path d="M680 266 H620" stroke="#0f766e" stroke-width="3" marker-end="url(#arrow-green)" />
+    <text x="650" y="284" text-anchor="middle" font-size="12" fill="#0f766e">committed envelope</text>
+
+    <path d="M906 220 H966" stroke="#0f766e" stroke-width="3" marker-end="url(#arrow-green)" />
+    <text x="936" y="204" text-anchor="middle" font-size="12" fill="#0f766e">prompt / permission.reply</text>
+    <path d="M974 266 H914" stroke="#0f766e" stroke-width="3" marker-end="url(#arrow-green)" />
+    <text x="944" y="284" text-anchor="middle" font-size="12" fill="#0f766e">native SSE</text>
+
+    <rect x="386" y="402" width="520" height="112" rx="10" fill="#fff7ed" stroke="#f0bf7a" />
+    <text x="646" y="440" text-anchor="middle" font-size="18" font-weight="800" fill="#8a3f0b">Mothership durable evidence</text>
+    <text x="646" y="468" text-anchor="middle" font-size="13" fill="#334155">raw event -> MothershipStreamEvent -> envelope / seq / checkpoint</text>
+    <text x="646" y="491" text-anchor="middle" font-size="13" fill="#334155">replay: ok / gap / expired / invalid</text>
+
+    <path d="M793 296 V394" stroke="#b45309" stroke-width="3" marker-end="url(#arrow-amber)" />
+    <text x="811" y="350" font-size="12" fill="#b45309">persist before publish</text>
+    <path d="M596 402 C556 352 526 330 504 296" stroke="#0f766e" stroke-width="3" fill="none" marker-end="url(#arrow-green)" />
+    <text x="530" y="354" font-size="12" fill="#0f766e">replay + live</text>
+
+    <rect x="92" y="570" width="1096" height="58" rx="8" fill="#f8fafc" stroke="#d7ded9" />
+    <text x="116" y="594" font-size="14" font-weight="800" fill="#111827">불변식</text>
+    <text x="180" y="594" font-size="14" fill="#334155">adapter의 핵심은 projector다. HITL 역방향만 resume를 원래 native permission.reply/question.reply로 전달한다.</text>
+    <text x="180" y="615" font-size="13" fill="#475569">Runtime이 필요하면 검증된 adapter 앞에 추가하되 OpenCode session과 evidence 소유권은 Mothership에 남긴다.</text>
   </g>
-
-  <path d="M270 236 H333" stroke="#2563eb" stroke-width="3" marker-end="url(#arrow-blue)" />
-  <path d="M529 236 H591" stroke="#2563eb" stroke-width="3" marker-end="url(#arrow-blue)" />
-  <path d="M782 236 H850" stroke="#2563eb" stroke-width="3" marker-end="url(#arrow-blue)" />
-  <text x="313" y="214" text-anchor="middle" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="12" fill="#2563eb">POST</text>
-  <text x="560" y="214" text-anchor="middle" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="12" fill="#2563eb">route</text>
-  <text x="817" y="214" text-anchor="middle" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="12" fill="#2563eb">RunAgentInput</text>
-
-  <g filter="url(#shadow)">
-    <rect x="312" y="420" width="210" height="98" rx="10" fill="#fff7ed" stroke="#f0bf7a" />
-    <text x="417" y="457" text-anchor="middle" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="17" font-weight="700" fill="#8a3f0b">evidence 저장소</text>
-    <text x="417" y="483" text-anchor="middle" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="13" fill="#334155">native timeline / DB</text>
-
-    <rect x="620" y="420" width="230" height="98" rx="10" fill="#ecfdf5" stroke="#99d7c5" />
-    <text x="735" y="457" text-anchor="middle" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="17" font-weight="700" fill="#064e3b">Mothership runtime</text>
-    <text x="735" y="483" text-anchor="middle" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="13" fill="#334155">run / turn / permission</text>
-
-    <rect x="948" y="420" width="206" height="98" rx="10" fill="#ecfdf5" stroke="#99d7c5" />
-    <text x="1051" y="457" text-anchor="middle" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="17" font-weight="700" fill="#064e3b">Provider runtime</text>
-    <text x="1051" y="483" text-anchor="middle" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="13" fill="#334155">native session</text>
-  </g>
-
-  <path d="M978 284 V354 C978 396 942 469 858 469" stroke="#0f766e" stroke-width="3" fill="none" marker-end="url(#arrow-green)" />
-  <path d="M850 469 H940" stroke="#0f766e" stroke-width="3" marker-end="url(#arrow-green)" />
-  <path d="M948 489 H858" stroke="#0f766e" stroke-width="3" marker-end="url(#arrow-green)" />
-  <path d="M620 489 H532" stroke="#b45309" stroke-width="3" marker-end="url(#arrow-green)" />
-  <path d="M735 420 C735 356 828 335 922 285" stroke="#0f766e" stroke-width="3" fill="none" marker-end="url(#arrow-green)" />
-
-  <text x="935" y="372" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="13" font-weight="700" fill="#064e3b">native stream 소유자</text>
-  <text x="886" y="454" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="12" fill="#0f766e">SDK event</text>
-  <text x="886" y="512" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="12" fill="#0f766e">관찰 event</text>
-  <text x="536" y="454" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="12" fill="#b45309">raw evidence</text>
-
-  <rect x="92" y="590" width="1090" height="42" rx="8" fill="#f8fafc" stroke="#d7ded9" />
-  <text x="116" y="616" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="14" font-weight="700" fill="#111827">불변식:</text>
-  <text x="184" y="616" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="14" fill="#334155">Runtime bridge는 AG-UI event를 재발행한다. native/provider stream의 첫 소비자는 Mothership이어야 한다.</text>
 </svg>

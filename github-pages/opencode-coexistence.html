@@ -23,6 +23,7 @@
       <nav class="top-links" aria-label="상단 내비게이션">
         <a href="./index.html">경계 문서</a>
         <a href="#boundary">소유권 경계</a>
+        <a href="#inventory">현재 프로젝터</a>
         <a href="#adapter">어댑터 계약</a>
         <a href="#sequence">구현 순서</a>
         <a href="./external-links.html">외부 링크</a>
@@ -33,6 +34,7 @@
       <aside class="side-nav" aria-label="문서 섹션">
         <a href="#decision" aria-current="true">결론</a>
         <a href="#status">확인된 상태</a>
+        <a href="#inventory">현재 프로젝터</a>
         <a href="#boundary">소유권 경계</a>
         <a href="#adapter">어댑터 계약</a>
         <a href="#mapping">이벤트 매핑</a>
@@ -48,7 +50,7 @@
       <main>
         <section class="hero" id="decision">
           <div class="hero-copy">
-            <p class="eyebrow">source-read decision · 2026-08-02</p>
+            <p class="eyebrow">source-read decision · 2026-08-03</p>
             <h1>
               <span>켜는 옵션은 없다.</span>
               <span>Mothership과</span>
@@ -58,7 +60,8 @@
             </h1>
             <p class="lede">
               <span>Mothership은 OpenCode native session과 native stream의 소유자로 남는다.</span>
-              <span>어댑터는 Mothership에 저장이 끝난 event만 AG-UI event로 변환한다.</span>
+              <span>어댑터의 핵심은 Mothership에 저장이 끝난 event를 AG-UI event로 바꾸는 projector다.</span>
+              <span>native HITL의 역방향만 AG-UI resume를 원래 OpenCode permission.reply로 전달한다.</span>
               <span>CopilotKit은 OpenCode를 다시 실행하거나 native SSE를 다시 소비하지 않는다.</span>
               <span>CopilotKit 연결 방식은 어댑터 계약과 검증이 끝난 뒤 배포 경계에 맞춰 결정한다.</span>
             </p>
@@ -69,11 +72,11 @@
               </div>
               <div role="listitem">
                 <strong>필수 구현</strong>
-                <span><code>Mothership committed envelope -> AG-UI events[]</code> projection adapter.</span>
+                <span><code>committed envelope -> AG-UI events[]</code> projector와 <code>resume[] -> permission.reply</code>.</span>
               </div>
               <div role="listitem">
-                <strong>CopilotKit 역할</strong>
-                <span>AG-UI projection을 소비하고 대화·상태·상호작용 UI를 렌더링한다.</span>
+                <strong>HITL 계약</strong>
+                <span><code>RUN_FINISHED outcome: interrupt</code>, <code>useInterrupt</code>, <code>resume[]</code>를 사용한다.</span>
               </div>
               <div role="listitem">
                 <strong>금지</strong>
@@ -97,20 +100,87 @@
             <div>
               <strong>소스로 확인됨</strong>
               <span>Mothership이 OpenCode native session을 만들고 같은 session에 후속 turn을 보낸다.</span>
-              <span>native event를 raw evidence와 stream envelope로 저장한 뒤 renderer에 전달한다.</span>
-              <span>permission/question의 native request ID와 abort 경로를 보존한다.</span>
+              <span>OpenCode native event를 <code>MothershipStreamEvent</code>로 바꾸는 projector가 이미 있다.</span>
+              <span>raw evidence와 stream envelope를 저장하고 permission/question의 native request ID를 보존한다.</span>
             </div>
             <div>
               <strong>아직 구현되지 않음</strong>
-              <span>Mothership envelope를 AG-UI event로 바꾸는 production adapter.</span>
-              <span>CopilotKit과 연결된 실제 replay/live/abort/permission 왕복.</span>
+              <span>Mothership committed envelope를 AG-UI <code>BaseEvent</code>로 바꾸는 두 번째 projector.</span>
+              <span>standard interrupt와 <code>resume[]</code>를 native reply로 연결하는 production adapter.</span>
               <span>CopilotKit dependency와 연결 방식의 제품 구성.</span>
             </div>
             <div>
               <strong>현재 판정</strong>
-              <span>공존 가능성은 높지만 아직 실행으로 증명되지 않았다.</span>
-              <span>아래 P0-P6를 구현하고 통합 테스트를 통과해야 “공존 완료”라고 말할 수 있다.</span>
+              <span>결론은 과거와 같다. 별도 실행기가 아니라 projection adapter를 만들어야 한다.</span>
+              <span>아래 구현과 실제 HITL 왕복 테스트 전에는 “공존 구현 완료”라고 말하지 않는다.</span>
             </div>
+          </div>
+        </section>
+
+        <section id="inventory" class="content-section">
+          <div class="section-heading">
+            <p class="eyebrow">current source audit</p>
+            <h2>첫 번째 프로젝터는 이미 있다</h2>
+            <p>
+              Education Shell은 OpenCode raw SSE를 그대로 UI에 던지지 않는다. native event를
+              Mothership 표준 stream event로 투영하고, seq가 있는 envelope로 저장한다.
+              새 작업은 이 원장을 다시 해석해 AG-UI로 투영하는 두 번째 projector다.
+            </p>
+          </div>
+
+          <pre><code>OpenCode native SSE
+  -> OpenCodeProcess raw event
+  -> existing OpenCode -> Mothership projector
+  -> persisted MothershipStreamEvent / envelope / seq
+  -> missing Mothership -> AG-UI projector
+  -> CopilotKit</code></pre>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>현재 Education Shell 구성</th>
+                  <th>상태</th>
+                  <th>의미</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>OpenCodeProcess</code></td>
+                  <td>구현됨</td>
+                  <td>SDK client, global native SSE, session과 native permission/question reply를 소유한다.</td>
+                </tr>
+                <tr>
+                  <td><code>projectOpenCodeStreamEvent</code></td>
+                  <td>구현됨</td>
+                  <td><code>permission.asked -> permission.requested</code> 등 native event를 Mothership event로 바꾼다.</td>
+                </tr>
+                <tr>
+                  <td>writer, ledger, replay, recovery</td>
+                  <td>구현됨</td>
+                  <td>저장 후 발행, seq replay/gap 판정, pending native interaction과 session 복구를 제공한다.</td>
+                </tr>
+                <tr>
+                  <td><code>MothershipEnvelope -> BaseEvent[]</code></td>
+                  <td>미구현</td>
+                  <td>CopilotKit이 소비할 production AG-UI projector다.</td>
+                </tr>
+                <tr>
+                  <td><code>resume[] -> permission.reply/question.reply</code></td>
+                  <td>미구현</td>
+                  <td>CopilotKit 버튼 결정을 같은 native request와 turn으로 돌려보내는 HITL bridge다.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="rule bad">
+            <strong>제거된 과거 어댑터는 정답이 아니다</strong>
+            <p>
+              Git 이력의 CopilotKit provider leaf sidecar는 요청마다 <code>copilot-leaf-opencode-*</code>
+              별도 session을 시작하고 결과 text를 반환한 synthetic verification이었다.
+              Mothership의 기존 run/turn/native permission을 투영하지 않았고, 현재 production 코드에서도 제거됐다.
+            </p>
           </div>
         </section>
 
@@ -165,31 +235,35 @@ CopilotKit UI</code></pre>
         <section id="adapter" class="content-section">
           <div class="section-heading">
             <p class="eyebrow">adapter contract</p>
-            <h2>만들어야 하는 것은 하나의 어댑터 경계다</h2>
+            <h2>어댑터의 핵심은 projector다</h2>
             <p>
-              외부 계약은 단순하다. Mothership 명령을 실행하고, 저장이 완료된 envelope를 받아,
-              CopilotKit이 이해하는 AG-UI event를 내보낸다. OpenCode SDK를 어댑터 안에서 다시 호출하지 않는다.
+              정방향은 저장이 완료된 Mothership envelope를 AG-UI event로 바꾸는 projector다.
+              역방향은 standard interrupt의 resume를 Mothership interaction command로 전달한다.
+              OpenCode SDK를 별도 실행하거나 raw native SSE를 다시 소비하지 않는다.
             </p>
           </div>
 
           <pre><code>interface MothershipAgUiAdapter {
   run(input: RunAgentInput): AsyncIterable&lt;AgUiEvent&gt;;
   abort(aguiRunId: string): Promise&lt;void&gt;;
-  replyPermission(requestId: string, decision: PermissionDecision): Promise&lt;void&gt;;
-  answerQuestion(requestId: string, answers: Answer[]): Promise&lt;void&gt;;
 }
 
-project(envelope, projectionState): AgUiEvent[]</code></pre>
+project(envelope, projectionState): AgUiEvent[]
+
+if (input.resume) {
+  validateInterruptIdentity(input.resume);
+  dispatchToMothershipNativeInteraction(input.resume);
+}</code></pre>
 
           <div class="decision-grid" aria-label="어댑터 내부 책임">
             <div>
               <strong>명령 변환</strong>
               <span><code>RunAgentInput</code>을 Mothership run 시작 또는 같은 run의 다음 turn 명령으로 변환한다.</span>
-              <span>abort와 interaction 응답은 원래 Mothership command에 전달한다.</span>
+              <span><code>resume[]</code>는 새 turn이 아니라 원래 pending interaction command로 전달한다.</span>
             </div>
             <div>
               <strong>이벤트 투영</strong>
-              <span>committed envelope를 AG-UI lifecycle, text, activity, state event로 바꾼다.</span>
+              <span>committed envelope를 AG-UI lifecycle, text, activity, state와 interrupt event로 바꾼다.</span>
               <span>native event와 evidence를 AG-UI 결과에서 역생성하지 않는다.</span>
             </div>
             <div>
@@ -200,11 +274,11 @@ project(envelope, projectionState): AgUiEvent[]</code></pre>
           </div>
 
           <div class="rule warn">
-            <strong>“simple projector”의 정확한 뜻</strong>
+            <strong><code>adapter = projector</code>의 정확한 뜻</strong>
             <p>
-              event 변환 함수 자체는 작고 결정적으로 유지한다. 그러나 adapter 전체에는 run/turn identity,
-              append/replace 메시지 상태, replay/live 경계, abort와 interaction 전달이 필요하다.
-              “native chunk를 AG-UI delta로 이름만 바꾸는 함수 하나”라는 뜻은 아니다.
+              공개 event를 만드는 핵심은 작고 결정적인 projection 함수다. 다만 AG-UI는 양방향이므로
+              wrapper는 run/turn identity, replay/live, abort와 interrupt resume dispatch를 함께 가진다.
+              실행 소유권을 가져오는 두 번째 agent runtime이라는 뜻은 아니다.
             </p>
           </div>
         </section>
@@ -256,8 +330,8 @@ project(envelope, projectionState): AgUiEvent[]</code></pre>
                 </tr>
                 <tr>
                   <td>permission/question pending</td>
-                  <td><code>ACTIVITY</code>, <code>CUSTOM</code> 또는 state</td>
-                  <td>표시만 투영하고 응답은 Mothership의 native interaction command로 보낸다.</td>
+                  <td><code>RUN_FINISHED</code> with <code>outcome.type = "interrupt"</code></td>
+                  <td><code>useInterrupt</code>가 UI를 렌더링하고 <code>resume[]</code>로 원래 interaction을 재개한다.</td>
                 </tr>
                 <tr>
                   <td>Mothership turn 완료</td>
@@ -291,7 +365,7 @@ project(envelope, projectionState): AgUiEvent[]</code></pre>
             </div>
             <div role="listitem">
               <strong>CopilotKit runId</strong>
-              <span>Mothership turnId에 매핑한다.</span>
+              <span>AG-UI 요청 시도에 해당한다. interrupt 전후의 여러 run이 같은 Mothership turn에 매핑될 수 있다.</span>
             </div>
             <div role="listitem">
               <strong>Mothership runId</strong>
@@ -318,23 +392,69 @@ project(envelope, projectionState): AgUiEvent[]</code></pre>
             <h2>permission과 question은 투영하되 소유권은 옮기지 않는다</h2>
             <p>
               Mothership은 이미 pending request ID, turn ID, native session을 알고 있다.
-              CopilotKit UI는 이를 보여주고 사용자의 결정을 받지만, 응답은 원래 Mothership command로 돌아가야 한다.
+              projector는 이를 AG-UI standard interrupt로 내보낸다. CopilotKit UI가 받은 결정은
+              <code>resume[]</code>로 adapter에 돌아오고, adapter는 원래 Mothership command를 호출한다.
             </p>
           </div>
 
           <pre><code>native permission/question event
-  -> Mothership stores pending interaction
-  -> adapter emits AG-UI activity/custom/state
-  -> CopilotKit UI renders approve/deny/answer controls
-  -> UI calls Mothership reply command with original requestId
-  -> Mothership replies to the same OpenCode native session</code></pre>
+  -> Mothership stores raw event + envelope + pending checkpoint
+  -> adapter emits RUN_FINISHED { outcome: { type: "interrupt" } }
+  -> CopilotKit useInterrupt renders approve/deny/answer controls
+  -> resolve(payload) sends RunAgentInput.resume[]
+  -> adapter validates interruptId -> runId/turnId/native requestId
+  -> Mothership respondPermission/respondQuestion
+  -> OpenCode permission.reply/question.reply on the same native turn</code></pre>
+
+          <figure class="wide-diagram">
+            <img src="./assets/permission-loop.svg" alt="OpenCode permission을 AG-UI standard interrupt로 표시하고 resume를 같은 native request의 permission.reply로 돌려보내는 흐름" />
+          </figure>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>사용자 결정</th>
+                  <th>Mothership command</th>
+                  <th>OpenCode native reply</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>한 번 승인</td>
+                  <td><code>respondPermission(allowed=true, always=false)</code></td>
+                  <td><code>permission.reply(..., "once")</code></td>
+                </tr>
+                <tr>
+                  <td>항상 승인</td>
+                  <td><code>respondPermission(allowed=true, always=true)</code></td>
+                  <td><code>permission.reply(..., "always")</code></td>
+                </tr>
+                <tr>
+                  <td>거절</td>
+                  <td><code>respondPermission(allowed=false)</code></td>
+                  <td><code>permission.reply(..., "reject")</code></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
 
           <div class="rule bad">
-            <strong><code>followUp: false</code>는 이 경계를 만드는 스위치가 아니다</strong>
+            <strong><code>followUp: false</code>와 <code>useHumanInTheLoop</code> 경로가 아니다</strong>
             <p>
-              이 옵션은 CopilotKit frontend tool 실행 후 agent를 자동으로 한 번 더 실행할지 여부만 정한다.
-              native stream 소유권, session 유지, replay, permission ID, abort를 해결하지 않는다.
-              실제 frontend tool을 의도적으로 사용할 때만 그 도구의 후속 실행 정책으로 판단한다.
+              <code>followUp</code>은 frontend tool handler 이후 agent 자동 재실행 옵션이다.
+              OpenCode가 발생시킨 native permission은 frontend tool이 아니므로 standard interrupt/resume를 쓴다.
+              거절도 <code>cancel()</code>이 아니라 <code>resolve({ decision: "reject" })</code>로 보내
+              native provider에 명시적 <code>reject</code>를 전달한다.
+            </p>
+          </div>
+
+          <div class="rule good">
+            <strong>승인 메시지가 아니라 native reply다</strong>
+            <p>
+              adapter는 승인 문장을 새 prompt로 보내거나 새 OpenCode session을 시작하지 않는다.
+              원래 request ID를 사용해 SDK <code>client.permission.reply()</code>를 호출한다.
+              CopilotKit에는 새 AG-UI resume 요청이 생기지만 Mothership에서는 같은 run과 같은 turn이 계속된다.
             </p>
           </div>
         </section>
@@ -444,12 +564,13 @@ project(envelope, projectionState): AgUiEvent[]</code></pre>
 
           <ol class="checklist">
             <li>P0: Mothership committed envelope fixture를 만들고 <code>project(envelope, state) -> AG-UI events[]</code> projector를 구현한다.</li>
-            <li>P1: <code>threadId -> runId</code>, CopilotKit <code>runId -> turnId</code>, message key와 projection watermark 저장 계약을 구현한다.</li>
+            <li>P1: <code>threadId -> runId</code>, AG-UI run/resume attempt -> Mothership turn, message key와 projection watermark 저장 계약을 구현한다.</li>
             <li>P2: Mothership event writer의 DB commit 이후 full envelope를 발행하는 subscriber bus를 추가한다.</li>
             <li>P3: subscriber 선등록, replay, buffered live flush 순서로 replay/live bridge를 구현한다.</li>
-            <li>P4: permission/question을 AG-UI activity/custom/state로 투영하고, 원래 request ID를 사용하는 Mothership reply command UI를 연결한다.</li>
-            <li>P5: CopilotKit Stop을 Mothership abort로 전달하고 단순 SSE disconnect와 구분한다.</li>
-            <li>P6: adapter 계약이 통과한 뒤 배포 경계에 맞춰 in-process bridge 또는 AG-UI HTTP/SSE endpoint를 선택한다.</li>
+            <li>P4: permission/question을 AG-UI standard interrupt로 투영하고 <code>resume[]</code>를 원래 native request의 Mothership reply command로 연결한다.</li>
+            <li>P5: once/always/reject/question 답변의 native reply, stale/duplicate/unauthorized resume를 검증한다.</li>
+            <li>P6: CopilotKit Stop을 Mothership abort로 전달하고 단순 SSE disconnect와 구분한다.</li>
+            <li>P7: adapter 계약이 통과한 뒤 배포 경계에 맞춰 in-process bridge 또는 AG-UI HTTP/SSE endpoint를 선택한다.</li>
           </ol>
         </section>
 
@@ -482,7 +603,8 @@ project(envelope, projectionState): AgUiEvent[]</code></pre>
             </div>
             <div>
               <strong>interaction</strong>
-              <span>permission/question 응답이 원래 request와 같은 native session으로 돌아가는지 확인한다.</span>
+              <span><code>RUN_FINISHED outcome: interrupt</code>가 렌더링되고 resume가 원래 request와 같은 native turn으로 돌아가는지 확인한다.</span>
+              <span>once/always/reject와 question answer가 정확한 <code>permission.reply/question.reply</code>로 매핑되는지 확인한다.</span>
             </div>
             <div>
               <strong>중단</strong>
@@ -513,6 +635,11 @@ project(envelope, projectionState): AgUiEvent[]</code></pre>
             <li><a href="https://docs.copilotkit.ai/concepts/architecture">CopilotKit Docs: Architecture</a></li>
             <li><a href="https://docs.copilotkit.ai/backend/ag-ui">CopilotKit Docs: AG-UI agent 연결</a></li>
             <li><a href="https://docs.copilotkit.ai/backend/copilot-runtime">CopilotKit Docs: Copilot Runtime</a></li>
+            <li><a href="https://docs.copilotkit.ai/a2a/human-in-the-loop/useInterrupt">CopilotKit Docs: useInterrupt</a></li>
+            <li><a href="https://github.com/nfbs2000/speaky-CopilotKit/blob/main/packages/react-core/src/v2/hooks/use-interrupt.tsx">CopilotKit source: standard interrupt와 resume[]</a></li>
+            <li>Education Shell 내부 구현 계약: <code>docs/architecture/mothership-copilotkit-agui-adapter-contract.md</code></li>
+            <li>Education Shell 내부 projector: <code>desktop/packages/mothership/src/shared/opencode-stream-events.ts</code></li>
+            <li>Education Shell 내부 native command: <code>desktop/packages/mothership/src/main/mothership-run-commands.ts</code></li>
             <li><a href="https://github.com/ag-ui-protocol/ag-ui">AG-UI protocol source</a></li>
             <li><a href="./index.html">Mothership x CopilotKit 경계 문서</a></li>
             <li><a href="./external-links.html">외부 링크 부록</a></li>
