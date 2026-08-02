@@ -681,6 +681,14 @@ pre code {
   text-underline-offset: 3px;
 }
 
+.adapter-page .hero {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.adapter-page .hero-copy {
+  max-width: 1100px;
+}
+
 @media (max-width: 1120px) {
   .page-shell {
     grid-template-columns: 1fr;
@@ -845,6 +853,20 @@ pre code {
 
   .contract-strip div {
     min-height: auto;
+  }
+
+  .adapter-page .side-nav {
+    display: flex;
+    flex-direction: row;
+    gap: 6px;
+    overflow-x: auto;
+    padding: 8px;
+    scrollbar-width: thin;
+  }
+
+  .adapter-page .side-nav a {
+    flex: 0 0 auto;
+    white-space: nowrap;
   }
 }
 
