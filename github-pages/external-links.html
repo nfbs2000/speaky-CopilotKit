@@ -6,7 +6,7 @@
     <title>외부 링크 부록</title>
     <meta
       name="description"
-      content="CopilotKit, Ghost, TinyTroupe, TradingAgents, PsychoPy GitHub Pages와 source link를 한곳에 모은 공개 부록."
+      content="CopilotKit, Book SDK 실제 증거 재생, Ghost, TinyTroupe, TradingAgents, PsychoPy GitHub Pages와 source link를 한곳에 모은 공개 부록."
     />
     <meta name="theme-color" content="#0f172a" />
     <link
@@ -36,6 +36,7 @@
       <aside class="side-nav" aria-label="문서 섹션">
         <a href="#summary" aria-current="true">요약</a>
         <a href="#repositories">repository 링크</a>
+        <a href="#book-sdk-evidence">Book SDK 실증</a>
         <a href="#pages">GitHub Pages</a>
         <a href="#rules">부록 규칙</a>
       </aside>
@@ -51,7 +52,7 @@
             </h1>
             <p class="lede">
               <span>이 부록은 이번 작업에서 만든 공개 GitHub Pages를 한곳에 모은 색인이다.</span>
-              <span>CopilotKit, Ghost, TinyTroupe, TradingAgents 페이지를 따로 찾아다니지 않도록 대표 URL과 세부 장 URL을 같이 둔다.</span>
+              <span>CopilotKit, Book SDK 실증, Ghost, TinyTroupe, TradingAgents 페이지를 따로 찾아다니지 않도록 대표 URL과 세부 장 URL을 같이 둔다.</span>
             </p>
             <div class="contract-strip" role="list" aria-label="부록 핵심">
               <div role="listitem">
@@ -73,6 +74,10 @@
               <div role="listitem">
                 <strong>PsychoPy</strong>
                 <span>심리 실험 도구 소개와 실제 Stroop RT 팀런·현재 검증 상태.</span>
+              </div>
+              <div role="listitem">
+                <strong>Book SDK evidence</strong>
+                <span>Python SDK 실제 실행 95건을 32건의 공개 사건으로 정제하고 다섯 표면에서 같은 판정을 재생.</span>
               </div>
               <div role="listitem">
                 <strong>source first</strong>
@@ -131,8 +136,92 @@
                   <td>심리학·행동과학 실험 설계 도구 fork</td>
                   <td>Builder/Python 실험 경로, 실제 Stroop RT 팀런, 현재 검증 경계</td>
                 </tr>
+                <tr>
+                  <td>Claude SDK Cookbook</td>
+                  <td><a href="https://github.com/nfbs2000/speaky-claude-cookbooks">nfbs2000/speaky-claude-cookbooks</a></td>
+                  <td>책 4장 주장과 실제 Python SDK 증거를 연결하는 공개 기준 페이지</td>
+                  <td>실행 ID·모델·raw hash·판정·무효 시도·공개 경계</td>
+                </tr>
+                <tr>
+                  <td>Agent Flow</td>
+                  <td><a href="https://github.com/nfbs2000/speaky-agent-flow">nfbs2000/speaky-agent-flow</a></td>
+                  <td>같은 증거를 원인·tool use/result·interrupt 흐름으로 재생</td>
+                  <td>source 95 / public 32, mapped/unmapped, claim source reference</td>
+                </tr>
+                <tr>
+                  <td>Runtime City</td>
+                  <td><a href="https://github.com/nfbs2000/speaky-PGSimCity">nfbs2000/speaky-PGSimCity</a></td>
+                  <td>같은 OTel 증거를 실행 구역과 시간축으로 재생</td>
+                  <td>Observed/Missing 보존, 32-step replay, source artifact hash</td>
+                </tr>
+                <tr>
+                  <td>Pixel Agents</td>
+                  <td><a href="https://github.com/nfbs2000/speaky-pixel-agents">nfbs2000/speaky-pixel-agents</a></td>
+                  <td>같은 tool lifecycle을 actor 상태 문법으로 재생</td>
+                  <td>제품 수집 run이 아닌 Education Shell 증거 projection임을 명시</td>
+                </tr>
+                <tr>
+                  <td>Hypnagonia</td>
+                  <td><a href="https://github.com/nfbs2000/speaky-hypnagonia">nfbs2000/speaky-hypnagonia</a></td>
+                  <td>같은 6개 주장을 카드·선택·관찰 consequence로 재생</td>
+                  <td>관찰 4 / 추가 관측 2, 실제 게임 결과와 구분</td>
+                </tr>
               </tbody>
             </table>
+          </div>
+        </section>
+
+        <section id="book-sdk-evidence" class="content-section">
+          <div class="section-heading">
+            <p class="eyebrow">book → live SDK → evidence → replay</p>
+            <h2>Book SDK 4장 실제 증거 체인</h2>
+            <p>
+              책 문장을 모델에게 다시 말하게 한 결과가 아니다. Python Claude Agent SDK를
+              <code>claude-opus-5</code>로 실제 순차 실행하고, raw message와 host timing을 저장한 뒤
+              공개 가능한 OTel 사건으로 투영했다. 같은 판정을 각 저장소의 시각 문법으로 재생한다.
+            </p>
+          </div>
+          <div class="contract-strip" role="list" aria-label="Book SDK 4장 실증 수치">
+            <div role="listitem">
+              <strong>95 source events</strong>
+              <span>SDK raw message와 host process 관찰을 포함한 검증 원전. credential·private prompt·비공개 추론 payload는 공개하지 않는다.</span>
+            </div>
+            <div role="listitem">
+              <strong>32 public events</strong>
+              <span>source event ID와 SHA-256 연결을 유지한 공개 projection. renderer가 판정을 바꿀 수 없다.</span>
+            </div>
+            <div role="listitem">
+              <strong>4 observed</strong>
+              <span>read-only overlap, mutating serialization, message stop 전 tool 시작, interrupt cancellation을 직접 관찰했다.</span>
+            </div>
+            <div role="listitem">
+              <strong>2 more evidence</strong>
+              <span>built-in·annotation 없는 도구 scheduling과 progress/persistence/large-result 경로는 추가 live run이 필요하다.</span>
+            </div>
+            <div role="listitem">
+              <strong>1 invalid attempt</strong>
+              <span>네트워크 retry·timeout으로 tool 사건이 생기지 않은 시도는 반증이 아니라 무효 시도로 분리했다.</span>
+            </div>
+            <div role="listitem">
+              <strong>범위 판정</strong>
+              <span>4장의 end-to-end 공개 증거 체인이다. 아직 43개 prompt와 다른 장이 남아 있으므로 전체 책 검증 완료가 아니다.</span>
+            </div>
+          </div>
+          <div class="rule-list">
+            <div class="rule good">
+              <strong>기준 문서와 재생 표면</strong>
+              <span><a href="https://nfbs2000.github.io/speaky-claude-cookbooks/book/evidence/ch04-live/">Cookbook · 4장 실제 Python SDK 관찰</a></span>
+              <span><a href="https://nfbs2000.github.io/speaky-claude-cookbooks/slides/book-sdk-ko/">Book SDK · 227장면 공개 슬라이드</a></span>
+              <span><a href="https://nfbs2000.github.io/speaky-agent-flow/education/?collection=book-sdk-ko&amp;run=ch04">Agent Flow · 원인과 tool lifecycle</a></span>
+              <span><a href="https://nfbs2000.github.io/speaky-PGSimCity/education/claude-sdk-runtime-city/?run=book-sdk-live-20260803">Runtime City · OTel 시간축과 실행 구역</a></span>
+              <span><a href="https://nfbs2000.github.io/speaky-pixel-agents/book-sdk-evidence/">Pixel Agents · actor 상태 재생</a></span>
+              <span><a href="https://nfbs2000.github.io/speaky-hypnagonia/book-sdk-ordeal/">Hypnagonia · Observation Ordeal</a></span>
+            </div>
+            <div class="rule warn">
+              <strong>CopilotKit과의 경계</strong>
+              <span>이번 trace는 CopilotKit이 수집한 실행이 아니다. Education Shell projector가 만든 검증된 공개 증거다.</span>
+              <span>향후 Mothership → AG-UI adapter에도 같은 원칙을 적용한다. native event 소유권·source ID·Missing 판정을 보존하고, HITL 응답은 native <code>permission.reply</code>로 되돌려야 한다.</span>
+            </div>
           </div>
         </section>
 
@@ -152,6 +241,14 @@
               <span><a href="https://nfbs2000.github.io/speaky-CopilotKit/opencode-coexistence.html">Mothership AG-UI projector와 native HITL 구현 계약</a></span>
               <span>Education Shell 내부 계약: <code>docs/architecture/mothership-copilotkit-agui-adapter-contract.md</code></span>
               <span><a href="https://nfbs2000.github.io/speaky-CopilotKit/external-links.html">외부 링크 부록</a></span>
+            </div>
+            <div class="rule good">
+              <strong>Book SDK 실제 증거 재생</strong>
+              <span><a href="https://nfbs2000.github.io/speaky-claude-cookbooks/book/evidence/ch04-live/">기준 증거 페이지</a></span>
+              <span><a href="https://nfbs2000.github.io/speaky-agent-flow/education/?collection=book-sdk-ko&amp;run=ch04">Agent Flow replay</a></span>
+              <span><a href="https://nfbs2000.github.io/speaky-PGSimCity/education/claude-sdk-runtime-city/?run=book-sdk-live-20260803">Runtime City replay</a></span>
+              <span><a href="https://nfbs2000.github.io/speaky-pixel-agents/book-sdk-evidence/">Pixel Agents replay</a></span>
+              <span><a href="https://nfbs2000.github.io/speaky-hypnagonia/book-sdk-ordeal/">Hypnagonia Observation Ordeal</a></span>
             </div>
             <div class="rule good">
               <strong>Ghost 분석 페이지</strong>
